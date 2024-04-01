@@ -1,6 +1,6 @@
 module {:extern "FileInput"} FileInput {
     class {:extern "Reader"} Reader {
-        static function method {:extern "getContent"} getContent() : array<char>
-        static function method {:extern "getTimestamp"} getTimestamp() : int 
+        static function {:extern "getContent"} getContent() : seq<char>
+        static function {:extern "getTimestamp"} getTimestamp() : int
     }
 }

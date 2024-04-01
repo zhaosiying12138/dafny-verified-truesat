@@ -22,7 +22,7 @@ module Utils {
     }
   }
 
-  function method abs(literal: Int32.t) : Int32.t {
+  function abs(literal: Int32.t) : Int32.t {
     if literal < 0 then - literal else literal
   }
 

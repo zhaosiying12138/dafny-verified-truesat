@@ -16,7 +16,7 @@ module Input {
         InputPredicate.valid(result.value);
     {
       var input := FileInput.Reader.getContent();
-      if (0 < input.Length < Int32.max as int) {
+      if (0 < |input| < Int32.max as int) {
         var parser := new Parser(input);
         var x := parser.parse();
         return x;
@@ -25,7 +25,7 @@ module Input {
       }
     }
 
-    function method getTimestamp() : int
+    function getTimestamp() : int
     {
       FileInput.Reader.getTimestamp()
     }

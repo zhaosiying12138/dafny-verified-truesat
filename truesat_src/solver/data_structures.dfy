@@ -28,7 +28,7 @@ trait DataStructures {
   predicate validVariablesCount() 
     reads `variablesCount;
   {
-    0 < variablesCount < Int32.max
+    0 < variablesCount < Int32.max as Int32.t
   }
 
   predicate validLiteral(literal : Int32.t) 
@@ -81,7 +81,7 @@ trait DataStructures {
     0 <= variable < variablesCount
   }
 
-  predicate validAssignmentTrace()
+  ghost predicate validAssignmentTrace()
     reads `variablesCount, `decisionLevel, `traceDLStart, 
           `traceDLEnd, `traceVariable, `traceValue, 
           traceDLStart, traceDLEnd, traceVariable,
@@ -101,7 +101,7 @@ trait DataStructures {
           traceValue;
     requires validVariablesCount();
   {
-    0 < variablesCount < Int32.max &&
+    0 < variablesCount < Int32.max as Int32.t &&
     -1 <= decisionLevel < variablesCount &&
     
     traceVariable.Length == variablesCount as int &&
@@ -163,7 +163,7 @@ trait DataStructures {
     )
   }
 
-  predicate validAssignmentTraceGhost()
+  ghost predicate validAssignmentTraceGhost()
     reads `variablesCount, `decisionLevel, `traceDLStart, 
           `traceDLEnd, `traceVariable, `traceValue, 
           traceDLStart, traceDLEnd, traceVariable,
@@ -205,7 +205,7 @@ trait DataStructures {
       -1 <= truthAssignment[i] <= 1) 
   }
 
-  predicate validTruthAssignment()
+  ghost predicate validTruthAssignment()
     reads this, traceVariable, traceValue, traceDLStart, traceDLEnd,
           truthAssignment;
     requires validVariablesCount();
@@ -252,7 +252,7 @@ trait DataStructures {
       getLiteralValue(truthAssignment, literal) == 1
   }
 
-  function method getVariableFromLiteral(literal : Int32.t) : Int32.t 
+  function getVariableFromLiteral(literal : Int32.t) : Int32.t 
     reads this;
     requires validVariablesCount();
     requires validLiteral(literal);
@@ -261,7 +261,7 @@ trait DataStructures {
     Utils.abs(literal)-1
   }
 
-  function method convertLVtoVI(literal : Int32.t, value : bool) : (Int32.t, Int32.t) 
+  function convertLVtoVI(literal : Int32.t, value : bool) : (Int32.t, Int32.t) 
     reads this; 
     requires validVariablesCount();
     requires validLiteral(literal);
@@ -512,7 +512,7 @@ trait DataStructures {
     (positiveLiteralsToClauses != negativeLiteralsToClauses)
   }
 
-  predicate valid() 
+  ghost predicate valid() 
     reads this, traceDLStart, traceDLEnd, traceVariable, traceValue, 
           truthAssignment, trueLiteralsCount, 
           falseLiteralsCount, clauseLength,
@@ -1221,15 +1221,16 @@ trait DataStructures {
         && isSatisfied(tau')
     );
   {
-    var tau' :| validValuesTruthAssignment(tau')
-        && isTauComplete(tau')
-        && isExtendingTau(tau, tau')
-        && isSatisfied(tau');
+    // var tau' :| validValuesTruthAssignment(tau')
+    //     && isTauComplete(tau')
+    //     && isExtendingTau(tau, tau')
+    //     && isSatisfied(tau');
+    var tau' := getExtendedCompleteTau(tau);
 
     tau'
   }
 
-  predicate isSatisfiableExtend(tau : seq<Int32.t>)
+  ghost predicate isSatisfiableExtend(tau : seq<Int32.t>)
     reads `variablesCount, `clauses, `clausesCount,
           `clauseLength, clauseLength;
     requires validVariablesCount();
@@ -1254,7 +1255,7 @@ trait DataStructures {
                 && isSatisfied(tau')
   }
 
-  function method isUnitClause(index : Int32.t) : bool
+  function isUnitClause(index : Int32.t) : bool
     reads this, traceVariable, traceValue, traceDLStart, 
           traceDLEnd, truthAssignment, trueLiteralsCount,
           falseLiteralsCount, clauseLength;
@@ -1272,7 +1273,7 @@ trait DataStructures {
     clauseLength[index] - falseLiteralsCount[index] == 1
   }
 
-  function method isEmptyClause(index : Int32.t) : bool
+  function isEmptyClause(index : Int32.t) : bool
     reads this, traceVariable, traceValue, traceDLStart, 
           traceDLEnd, truthAssignment, trueLiteralsCount,
           falseLiteralsCount, clauseLength;

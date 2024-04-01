@@ -21,7 +21,7 @@ class Formula extends DataStructures {
 
     ensures this.decisionLevel == -1;
   {
-    assert 0 < variablesCount < Int32.max;
+    assert 0 < variablesCount < Int32.max as Int32.t;
     assert 0 < |clauses| <= Int32.max as int;
     assert forall clause :: (clause in clauses) ==>
                forall literal :: (literal in clause) ==> (
@@ -840,7 +840,7 @@ class Formula extends DataStructures {
     assert old(traceVariable[..]) == traceVariable[..];
   }
 
-  function getDecisionLevel(dL : Int32.t) : set<(Int32.t, bool)>
+  ghost function getDecisionLevel(dL : Int32.t) : set<(Int32.t, bool)>
     reads `variablesCount, `decisionLevel, `traceDLStart,
           `traceDLEnd, `traceVariable, `traceValue,
           traceDLStart, traceDLEnd, traceVariable,
@@ -1067,7 +1067,7 @@ class Formula extends DataStructures {
   {
     notEmptyNoEmptyClauses_existUnsetLiteralInClauses();
 
-    var minim : Int32.t := Int32.max;
+    var minim : Int32.t := Int32.max as Int32.t;
     var counter : Int32.t := 0;
     var result : Int32.t := -1;
     var ok := false;
@@ -1075,7 +1075,7 @@ class Formula extends DataStructures {
     var cI : Int32.t := 0;
     while (cI < clausesCount)
       invariant 0 <= cI <= clausesCount;
-      invariant !ok ==> counter == 0 && minim == Int32.max && (exists i', k' ::
+      invariant !ok ==> counter == 0 && minim == Int32.max as Int32.t && (exists i', k' ::
         cI <= i' < clausesCount &&
         0 <= k' < |clauses[i']| &&
         trueLiteralsCount[i'] == 0 &&
@@ -1403,7 +1403,7 @@ class Formula extends DataStructures {
       traceVariable[j] == variable
   }
 
-  predicate occursInAssignmentsTrace(variable : Int32.t)
+  ghost predicate occursInAssignmentsTrace(variable : Int32.t)
     reads this, traceDLStart, traceDLEnd, traceVariable, traceValue,
           truthAssignment, trueLiteralsCount,
           falseLiteralsCount, clauseLength,

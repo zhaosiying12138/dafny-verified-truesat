@@ -7,29 +7,29 @@ module Useless {
   import Int32
   import InputPredicate
 
-  predicate valid'(c : array<char>) {
-    0 < c.Length < Int32.max as int
+  predicate valid'(c : seq<char>) {
+    0 < |c| < Int32.max as int
   }
 
   class Parser {
-    var content : array<char>;
+    var content : seq<char>;
     var contentLength : Int32.t;
     var cursor : Int32.t;
 
-    constructor(c : array<char>) 
+    constructor(c : seq<char>) 
       requires valid'(c);
       ensures valid();
     {
       content := c; 
-      contentLength := c.Length as Int32.t;
+      contentLength := |c| as Int32.t;
       cursor := 0;
     }
 
     predicate valid() 
-      reads `content, content, `contentLength, `cursor;
+      reads `content, `contentLength, `cursor;
     {
       valid'(content) && 
-      contentLength as int == content.Length &&
+      contentLength as int == |content| &&
       0 <= cursor <= contentLength
     }
 
@@ -74,7 +74,7 @@ module Useless {
       ensures old(cursor) <= cursor;
       ensures res.Just? ==> old(cursor) < cursor;
     {
-      var number := 0;
+      var number : Int32.t := 0;
       var isNegative : bool := false;
 
       if (cursor < contentLength && content[cursor] == '-') {
@@ -88,11 +88,11 @@ module Useless {
 
       while (cursor < contentLength && ('0' <= content[cursor] <= '9'))
         invariant 0 <= cursor <= contentLength;
-        invariant 0 <= number <= Int32.max;
+        invariant 0 <= number <= Int32.max as Int32.t;
       {
         var digit : Int32.t := content[cursor] as Int32.t - '0' as Int32.t;
-        if (number <= (Int32.max - digit) / 10) {
-          assert 0 <= (Int32.max - digit) / 10 - number;
+        if (number <= (Int32.max as Int32.t - digit) / 10) {
+          assert 0 <= (Int32.max as Int32.t - digit) / 10 - number;
           number := number * 10 + digit;
         } else {
           return Error("There is a number bigger than Int32.max");
@@ -123,7 +123,7 @@ module Useless {
       var ok := false; 
       var literalsCount : Int32.t := 0;
 
-      var contentLength : Int32.t := content.Length as Int32.t;
+      var contentLength : Int32.t := |content| as Int32.t;
       while (cursor < contentLength) 
         modifies `cursor, clause;
 
@@ -136,7 +136,7 @@ module Useless {
             (clause[z] > 0 && 0 < clause[z] <= variablesCount));
         invariant forall x, y :: 0 <= x < y < clauseLength ==>
             clause[x] < clause[y]
-        invariant ok ==>  0 < variablesCount < Int32.max;
+        invariant ok ==>  0 < variablesCount < Int32.max as Int32.t;
         invariant InputPredicate.countLiterals(clauses) == literalsCount as int;
 
         decreases contentLength - cursor;
@@ -152,7 +152,7 @@ module Useless {
               return Error(t);
             } 
             case Just(number) => {
-              if (0 < number < Int32.max) {
+              if (0 < number < Int32.max as Int32.t) {
                 variablesCount := number;
                 ok := true;
               } else {
@@ -188,7 +188,7 @@ module Useless {
             case Just(number) => {
               if (number == 0 && clauseLength > 0) {
                 clauses := clauses + [clause[..clauseLength]];
-                if (Int32.max - clauseLength > literalsCount) {
+                if (Int32.max as Int32.t - clauseLength > literalsCount) {
                   literalsCount := literalsCount + clauseLength;
                 } else {
                   return Error("The number of literals is to big");

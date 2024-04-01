@@ -25,7 +25,7 @@ module InputPredicate {
   }
 
   predicate valid(input : (Int32.t, seq<seq<Int32.t>>)) {
-    (0 < input.0 < Int32.max) &&
+    (0 < input.0 < Int32.max as Int32.t) &&
 
     (0 < |input.1| <= Int32.max as int) &&
 
