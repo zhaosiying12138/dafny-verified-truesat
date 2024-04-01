@@ -1,0 +1,15 @@
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/bin/Debug/net6.0/MyProject
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/bin/Debug/net6.0/MyProject.deps.json
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/bin/Debug/net6.0/MyProject.runtimeconfig.json
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/bin/Debug/net6.0/MyProject.dll
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/bin/Debug/net6.0/ref/MyProject.dll
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/bin/Debug/net6.0/MyProject.pdb
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/obj/Debug/net6.0/MyProject.csproj.AssemblyReference.cache
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/obj/Debug/net6.0/MyProject.GeneratedMSBuildEditorConfig.editorconfig
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/obj/Debug/net6.0/MyProject.AssemblyInfoInputs.cache
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/obj/Debug/net6.0/MyProject.AssemblyInfo.cs
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/obj/Debug/net6.0/MyProject.csproj.CoreCompileInputs.cache
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/obj/Debug/net6.0/MyProject.dll
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/obj/Debug/net6.0/ref/MyProject.dll
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/obj/Debug/net6.0/MyProject.pdb
+/home/zhaosiying12138/codebase/truesat_upstream/dafny-verified-truesat/truesat_src/MyProject/obj/Debug/net6.0/MyProject.genruntimeconfig.cache
