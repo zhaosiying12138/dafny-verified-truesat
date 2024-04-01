@@ -1,7 +1,7 @@
 include "formula.dfy"
 include "../int32.dfy"
 
-datatype SAT_UNSAT = SAT(tau:seq<Int32.t>) | UNSAT
+datatype SAT_UNSAT = SAT(tau:seq<SYInt32.t>) | UNSAT
 
 class SATSolver {
   var formula : Formula;
@@ -14,7 +14,7 @@ class SATSolver {
     formula := f';
   }
 
-  method step(literal : Int32.t, value : bool) returns (result : SAT_UNSAT)
+  method step(literal : SYInt32.t, value : bool) returns (result : SAT_UNSAT)
     requires formula.valid();
     requires formula.decisionLevel < formula.variablesCount - 1; // not full
     requires formula.decisionLevel > -1 ==>
@@ -62,10 +62,10 @@ class SATSolver {
     formula.revertLastDecisionLevel();
 
     if (formula.truthAssignment[..] != old(formula.truthAssignment[..])) {
-      ghost var i : Int32.t :| 0 <= i as int < formula.truthAssignment.Length &&
+      ghost var i : SYInt32.t :| 0 <= i as int < formula.truthAssignment.Length &&
               formula.truthAssignment[i] != old(formula.truthAssignment[i]);
 
-      ghost var y : (Int32.t, bool) := (i, formula.convertIntToBool(old(formula.truthAssignment[i])));
+      ghost var y : (SYInt32.t, bool) := (i, formula.convertIntToBool(old(formula.truthAssignment[i])));
       assert false;
     }
 

@@ -2,36 +2,36 @@ include "utils.dfy"
 include "../int32.dfy"
 
 trait DataStructures { 
-  var variablesCount : Int32.t;
-  var clauses : seq<seq<Int32.t>>;
-  var clausesCount : Int32.t;
-  var clauseLength : array<Int32.t>;
+  var variablesCount : SYInt32.t;
+  var clauses : seq<seq<SYInt32.t>>;
+  var clausesCount : SYInt32.t;
+  var clauseLength : array<SYInt32.t>;
 
-  var truthAssignment : array<Int32.t>; // from 0 to variablesCount - 1, values: -1, 0, 1
+  var truthAssignment : array<SYInt32.t>; // from 0 to variablesCount - 1, values: -1, 0, 1
 
-  var trueLiteralsCount : array<Int32.t>; // from 0 to |clauses| - 1
-  var falseLiteralsCount : array<Int32.t>; // from 0 to |clauses| - 1
+  var trueLiteralsCount : array<SYInt32.t>; // from 0 to |clauses| - 1
+  var falseLiteralsCount : array<SYInt32.t>; // from 0 to |clauses| - 1
 
-  var positiveLiteralsToClauses : array<seq<Int32.t>>; // from 0 to variablesCount - 1
-  var negativeLiteralsToClauses : array<seq<Int32.t>>; // frm 0 to variablesCount - 1
+  var positiveLiteralsToClauses : array<seq<SYInt32.t>>; // from 0 to variablesCount - 1
+  var negativeLiteralsToClauses : array<seq<SYInt32.t>>; // frm 0 to variablesCount - 1
 
-  var decisionLevel : Int32.t;
+  var decisionLevel : SYInt32.t;
 
-  var traceVariable : array<Int32.t>;
+  var traceVariable : array<SYInt32.t>;
   var traceValue : array<bool>;
 
-  var traceDLStart : array<Int32.t>;
-  var traceDLEnd : array<Int32.t>;
+  var traceDLStart : array<SYInt32.t>;
+  var traceDLEnd : array<SYInt32.t>;
 
-  ghost var assignmentsTrace : set<(Int32.t, bool)>;
+  ghost var assignmentsTrace : set<(SYInt32.t, bool)>;
 
   predicate validVariablesCount() 
     reads `variablesCount;
   {
-    0 < variablesCount < Int32.max as Int32.t
+    0 < variablesCount < SYInt32.max as SYInt32.t
   }
 
-  predicate validLiteral(literal : Int32.t) 
+  predicate validLiteral(literal : SYInt32.t) 
     requires validVariablesCount();
     reads `variablesCount;
   {
@@ -40,11 +40,11 @@ trait DataStructures {
     else false
   }
 
-  predicate validClause(clause : seq<Int32.t>) 
+  predicate validClause(clause : seq<SYInt32.t>) 
     requires validVariablesCount();
     reads `variablesCount;
   {
-    |clause| < Int32.max as int &&
+    |clause| < SYInt32.max as int &&
     (forall x, y :: 0 <= x < y < |clause| ==>
       clause[x] != clause[y])
     &&
@@ -57,7 +57,7 @@ trait DataStructures {
           `clauseLength, clauseLength;
     requires validVariablesCount();
   {
-    0 < |clauses| == clausesCount as int <= Int32.max as int 
+    0 < |clauses| == clausesCount as int <= SYInt32.max as int 
     
     && 
 
@@ -66,7 +66,7 @@ trait DataStructures {
     &&
 
     (forall i :: 0 <= i < clausesCount ==>
-      0 < clauseLength[i] as int == |clauses[i]| < Int32.max as int) 
+      0 < clauseLength[i] as int == |clauses[i]| < SYInt32.max as int) 
     
     &&
 
@@ -74,7 +74,7 @@ trait DataStructures {
       validClause(clause)
   }
 
-  predicate validVariable(variable : Int32.t)
+  predicate validVariable(variable : SYInt32.t)
     reads `variablesCount;
     requires validVariablesCount();
   {
@@ -101,7 +101,7 @@ trait DataStructures {
           traceValue;
     requires validVariablesCount();
   {
-    0 < variablesCount < Int32.max as Int32.t &&
+    0 < variablesCount < SYInt32.max as SYInt32.t &&
     -1 <= decisionLevel < variablesCount &&
     
     traceVariable.Length == variablesCount as int &&
@@ -189,18 +189,18 @@ trait DataStructures {
     ))
   }
 
-  function convertIntToBool(x : Int32.t) : bool
+  function convertIntToBool(x : SYInt32.t) : bool
   {
     if x == 0 then false
     else true
   }
 
-  predicate validValuesTruthAssignment(truthAssignment : seq<Int32.t>)
+  predicate validValuesTruthAssignment(truthAssignment : seq<SYInt32.t>)
     reads `variablesCount;
     requires validVariablesCount();
   {
     |truthAssignment| == variablesCount as int &&
-    |truthAssignment| <= Int32.max as int &&
+    |truthAssignment| <= SYInt32.max as int &&
     (forall i :: 0 <= i < |truthAssignment| ==>
       -1 <= truthAssignment[i] <= 1) 
   }
@@ -226,7 +226,7 @@ trait DataStructures {
       (i, false) !in assignmentsTrace && (i, true) !in assignmentsTrace)
   }
 
-  function getLiteralValue(truthAssignment : seq<Int32.t>, literal : Int32.t) : Int32.t
+  function getLiteralValue(truthAssignment : seq<SYInt32.t>, literal : SYInt32.t) : SYInt32.t
     reads `variablesCount;
     requires validVariablesCount();
     requires validValuesTruthAssignment(truthAssignment);
@@ -239,7 +239,7 @@ trait DataStructures {
     else truthAssignment[variable]
   }
 
-  predicate isClauseSatisfied(truthAssignment : seq<Int32.t>, clauseIndex : Int32.t) 
+  predicate isClauseSatisfied(truthAssignment : seq<SYInt32.t>, clauseIndex : SYInt32.t) 
     reads `variablesCount, `clauses, `clausesCount,
           `clauseLength, clauseLength;
     requires validVariablesCount();
@@ -252,7 +252,7 @@ trait DataStructures {
       getLiteralValue(truthAssignment, literal) == 1
   }
 
-  function getVariableFromLiteral(literal : Int32.t) : Int32.t 
+  function getVariableFromLiteral(literal : SYInt32.t) : SYInt32.t 
     reads this;
     requires validVariablesCount();
     requires validLiteral(literal);
@@ -261,7 +261,7 @@ trait DataStructures {
     Utils.abs(literal)-1
   }
 
-  function convertLVtoVI(literal : Int32.t, value : bool) : (Int32.t, Int32.t) 
+  function convertLVtoVI(literal : SYInt32.t, value : bool) : (SYInt32.t, SYInt32.t) 
     reads this; 
     requires validVariablesCount();
     requires validLiteral(literal);
@@ -277,7 +277,7 @@ trait DataStructures {
     (variable, val)
   }
 
-  predicate validTrueLiteralsCount(truthAssignment : seq<Int32.t>)
+  predicate validTrueLiteralsCount(truthAssignment : seq<SYInt32.t>)
     reads `variablesCount, `clauses, `trueLiteralsCount, `clauseLength, 
           `clausesCount, trueLiteralsCount, clauseLength;
     requires validVariablesCount();
@@ -289,9 +289,9 @@ trait DataStructures {
       0 <= trueLiteralsCount[i] == countTrueLiterals(truthAssignment, clauses[i])
   }
 
-  function countUnsetVariables(truthAssignment : seq<Int32.t>) : Int32.t
-    requires |truthAssignment| <= Int32.max as int;
-    ensures 0 <= countUnsetVariables(truthAssignment) as int <= |truthAssignment| <= Int32.max as int;
+  function countUnsetVariables(truthAssignment : seq<SYInt32.t>) : SYInt32.t
+    requires |truthAssignment| <= SYInt32.max as int;
+    ensures 0 <= countUnsetVariables(truthAssignment) as int <= |truthAssignment| <= SYInt32.max as int;
   {
     if |truthAssignment| == 0 then 0
     else (
@@ -300,7 +300,7 @@ trait DataStructures {
     )
   }
 
-  function countTrueLiterals(truthAssignment : seq<Int32.t>, clause : seq<Int32.t>) : Int32.t
+  function countTrueLiterals(truthAssignment : seq<SYInt32.t>, clause : seq<SYInt32.t>) : SYInt32.t
     reads `variablesCount, `clauseLength, clauseLength;
     requires validVariablesCount();
     requires validValuesTruthAssignment(truthAssignment);
@@ -313,7 +313,7 @@ trait DataStructures {
       ok + countTrueLiterals(truthAssignment, clause[1..])
   }
 
-  lemma prop_countTrueLiterals_initialTruthAssignment(truthAssignment : seq<Int32.t>, clause : seq<Int32.t>)
+  lemma prop_countTrueLiterals_initialTruthAssignment(truthAssignment : seq<SYInt32.t>, clause : seq<SYInt32.t>)
     requires validVariablesCount();
     requires validAssignmentTrace();
     requires validValuesTruthAssignment(truthAssignment);
@@ -331,7 +331,7 @@ trait DataStructures {
     }
   }
 
-  lemma countTrueLiterals0_noLiteralsTrue(truthAssignment : seq<Int32.t>, clause : seq<Int32.t>) 
+  lemma countTrueLiterals0_noLiteralsTrue(truthAssignment : seq<SYInt32.t>, clause : seq<SYInt32.t>) 
     requires validVariablesCount();
     requires validClause(clause);
     requires validValuesTruthAssignment(truthAssignment);
@@ -351,7 +351,7 @@ trait DataStructures {
       }
   }
 
-  lemma countTrueLiteralsX_existsTrueLiteral(truthAssignment : seq<Int32.t>, clause : seq<Int32.t>) 
+  lemma countTrueLiteralsX_existsTrueLiteral(truthAssignment : seq<SYInt32.t>, clause : seq<SYInt32.t>) 
     requires validVariablesCount();
     requires validClause(clause);
     requires validValuesTruthAssignment(truthAssignment);
@@ -372,7 +372,7 @@ trait DataStructures {
     }
   }
 
-  predicate validFalseLiteralsCount(truthAssignment : seq<Int32.t>)
+  predicate validFalseLiteralsCount(truthAssignment : seq<SYInt32.t>)
     reads `variablesCount, `clauses, `falseLiteralsCount, `clauseLength, 
           `clausesCount, falseLiteralsCount, clauseLength;
     requires validVariablesCount();
@@ -384,7 +384,7 @@ trait DataStructures {
       0 <= falseLiteralsCount[i] == countFalseLiterals(truthAssignment, clauses[i])
   }
 
-  function countFalseLiterals(truthAssignment : seq<Int32.t>, clause : seq<Int32.t>) : Int32.t
+  function countFalseLiterals(truthAssignment : seq<SYInt32.t>, clause : seq<SYInt32.t>) : SYInt32.t
     reads `variablesCount, `clauseLength, clauseLength;
     requires validVariablesCount();
     requires validValuesTruthAssignment(truthAssignment);
@@ -397,7 +397,7 @@ trait DataStructures {
       ok + countFalseLiterals(truthAssignment, clause[1..])
   }
 
-  lemma prop_countFalseLiterals_initialTruthAssignment(truthAssignment : seq<Int32.t>, clause : seq<Int32.t>)
+  lemma prop_countFalseLiterals_initialTruthAssignment(truthAssignment : seq<SYInt32.t>, clause : seq<SYInt32.t>)
     requires validVariablesCount();
     requires validValuesTruthAssignment(truthAssignment);
     requires validClause(clause);
@@ -424,16 +424,16 @@ trait DataStructures {
     
     &&
 
-    (forall variable : Int32.t :: 0 <= variable as int < positiveLiteralsToClauses.Length ==> 
+    (forall variable : SYInt32.t :: 0 <= variable as int < positiveLiteralsToClauses.Length ==> 
       validPositiveLiteralToClause(variable, positiveLiteralsToClauses[variable]))
 
     &&
 
-    (forall variable : Int32.t :: 0 <= variable as int < positiveLiteralsToClauses.Length ==> 
+    (forall variable : SYInt32.t :: 0 <= variable as int < positiveLiteralsToClauses.Length ==> 
       |positiveLiteralsToClauses[variable]| <= clausesCount as int)
   }
 
-  predicate validPositiveLiteralToClause(variable : Int32.t, s : seq<Int32.t>) 
+  predicate validPositiveLiteralToClause(variable : SYInt32.t, s : seq<SYInt32.t>) 
     reads this, clauseLength; 
 
     requires validVariablesCount();
@@ -464,11 +464,11 @@ trait DataStructures {
 
     &&
 
-    (forall variable : Int32.t :: 0 <= variable as int < negativeLiteralsToClauses.Length ==> 
+    (forall variable : SYInt32.t :: 0 <= variable as int < negativeLiteralsToClauses.Length ==> 
       |negativeLiteralsToClauses[variable]| <= clausesCount as int)
   }
 
-  predicate validNegativeLiteralsToClause(variable : Int32.t, s : seq<Int32.t>)
+  predicate validNegativeLiteralsToClause(variable : SYInt32.t, s : seq<SYInt32.t>)
     reads this, clauseLength;
 
     requires validVariablesCount();
@@ -482,7 +482,7 @@ trait DataStructures {
     (forall clauseIndex :: clauseIndex in s ==>
       -variable-1 in clauses[clauseIndex]) &&
 
-    (forall clauseIndex : Int32.t :: 0 <= clauseIndex as int < |clauses| && 
+    (forall clauseIndex : SYInt32.t :: 0 <= clauseIndex as int < |clauses| && 
                                      clauseIndex !in s ==>
       -variable-1 !in clauses[clauseIndex])
   }
@@ -521,7 +521,7 @@ trait DataStructures {
     validReferences() &&
     validVariablesCount() &&
     validClauses() &&
-    countLiterals(clausesCount) < Int32.max as int &&
+    countLiterals(clausesCount) < SYInt32.max as int &&
     validAssignmentTrace() &&
     validTruthAssignment() &&
 
@@ -532,7 +532,7 @@ trait DataStructures {
     validNegativeLiteralsToClauses()
   }
 
-  function countLiterals(clauseIndex : Int32.t) : int
+  function countLiterals(clauseIndex : SYInt32.t) : int
     reads `variablesCount, `clauses, `clausesCount,
           `clauseLength, clauseLength;
     requires validVariablesCount();
@@ -543,13 +543,13 @@ trait DataStructures {
     else |clauses[clauseIndex-1]| + countLiterals(clauseIndex-1)
   }
 
-  lemma countLiterals_monotone(cI : Int32.t)
+  lemma countLiterals_monotone(cI : SYInt32.t)
     requires validVariablesCount();
     requires validClauses();
-    requires countLiterals(clausesCount) < Int32.max as int;
+    requires countLiterals(clausesCount) < SYInt32.max as int;
     requires 0 <= cI <= clausesCount;
     ensures 0 <= cI < clausesCount ==> 
-      countLiterals(cI) < countLiterals(cI+1) < Int32.max as int;
+      countLiterals(cI) < countLiterals(cI+1) < SYInt32.max as int;
     decreases clausesCount - cI;
   {
     if (cI == clausesCount) {
@@ -564,11 +564,11 @@ trait DataStructures {
   }
 
   lemma clausesNotImpacted_TFArraysSame(
-    oldTau : seq<Int32.t>, 
-    newTau : seq<Int32.t>, 
-    variable : Int32.t, 
-    impactedClauses : seq<Int32.t>, 
-    impactedClauses' : seq<Int32.t>
+    oldTau : seq<SYInt32.t>, 
+    newTau : seq<SYInt32.t>, 
+    variable : SYInt32.t, 
+    impactedClauses : seq<SYInt32.t>, 
+    impactedClauses' : seq<SYInt32.t>
   )
     requires validVariablesCount();
     requires validValuesTruthAssignment(oldTau);
@@ -582,16 +582,16 @@ trait DataStructures {
     requires newTau[variable] == 1 ==> validNegativeLiteralsToClause(variable, impactedClauses');
     requires newTau[variable] == 0 ==> validPositiveLiteralToClause(variable, impactedClauses');
     requires newTau[variable] == 0 ==> validNegativeLiteralsToClause(variable, impactedClauses);
-    requires forall x : Int32.t :: 0 <= x as int < |oldTau| && x != variable
+    requires forall x : SYInt32.t :: 0 <= x as int < |oldTau| && x != variable
       ==> oldTau[x] == newTau[x];
     requires oldTau[variable] == -1;
     requires newTau[variable] in [0, 1];
 
-    ensures forall clauseIndex : Int32.t :: 0 <= clauseIndex as int < |clauses|
+    ensures forall clauseIndex : SYInt32.t :: 0 <= clauseIndex as int < |clauses|
       && clauseIndex !in impactedClauses ==>
         countTrueLiterals(oldTau, clauses[clauseIndex]) ==
           countTrueLiterals(newTau, clauses[clauseIndex]);
-    ensures forall clauseIndex : Int32.t :: 0 <= clauseIndex as int < |clauses|
+    ensures forall clauseIndex : SYInt32.t :: 0 <= clauseIndex as int < |clauses|
       && clauseIndex !in impactedClauses' ==>
         countFalseLiterals(oldTau, clauses[clauseIndex]) ==
           countFalseLiterals(newTau, clauses[clauseIndex]);
@@ -607,7 +607,7 @@ trait DataStructures {
     assert getLiteralValue(newTau, trueLiteral) == 1;
     assert getLiteralValue(newTau, falseLiteral) == 0;
 
-    forall clauseIndex : Int32.t | 0 <= clauseIndex as int < |clauses|
+    forall clauseIndex : SYInt32.t | 0 <= clauseIndex as int < |clauses|
       ensures clauseIndex !in impactedClauses ==>
         countTrueLiterals(oldTau, clauses[clauseIndex])
           == countTrueLiterals(newTau, clauses[clauseIndex]);
@@ -666,10 +666,10 @@ trait DataStructures {
   }
 
   lemma setVariable_countTrueLiteralsIncreasesWithOne(
-    oldTau : seq<Int32.t>, 
-    newTau : seq<Int32.t>, 
-    variable : Int32.t, 
-    clause : seq<Int32.t>
+    oldTau : seq<SYInt32.t>, 
+    newTau : seq<SYInt32.t>, 
+    variable : SYInt32.t, 
+    clause : seq<SYInt32.t>
   )
     requires validVariablesCount();
     requires validValuesTruthAssignment(oldTau);
@@ -678,7 +678,7 @@ trait DataStructures {
     requires validClause(clause);
     requires newTau[variable] == 1 ==> variable+1 in clause;
     requires newTau[variable] == 0 ==> -variable-1 in clause;
-    requires forall x : Int32.t :: 0 <= x as int < |oldTau| && x != variable
+    requires forall x : SYInt32.t :: 0 <= x as int < |oldTau| && x != variable
       ==> oldTau[x] == newTau[x];
     requires oldTau[variable] == -1;
     requires newTau[variable] in [0, 1];
@@ -730,10 +730,10 @@ trait DataStructures {
   }
 
   lemma setVariable_countFalseLiteralsIncreasesWithOne(
-    oldTau : seq<Int32.t>, 
-    newTau : seq<Int32.t>, 
-    variable : Int32.t, 
-    clause : seq<Int32.t>
+    oldTau : seq<SYInt32.t>, 
+    newTau : seq<SYInt32.t>, 
+    variable : SYInt32.t, 
+    clause : seq<SYInt32.t>
   )
     requires validVariablesCount();
     requires validValuesTruthAssignment(oldTau);
@@ -742,7 +742,7 @@ trait DataStructures {
     requires validClause(clause);
     requires newTau[variable] == 1 ==> -variable-1 in clause;
     requires newTau[variable] == 0 ==> variable+1 in clause;
-    requires forall x : Int32.t :: 0 <= x as int < |oldTau| && x != variable
+    requires forall x : SYInt32.t :: 0 <= x as int < |oldTau| && x != variable
       ==> oldTau[x] == newTau[x];
     requires oldTau[variable] == -1;
     requires newTau[variable] in [0, 1];
@@ -797,9 +797,9 @@ trait DataStructures {
   }
 
   lemma literalTrue_countTrueLiteralsAtLeastOne (
-    oldTau : seq<Int32.t>,
-    variable : Int32.t,
-    clause : seq<Int32.t>
+    oldTau : seq<SYInt32.t>,
+    variable : SYInt32.t,
+    clause : seq<SYInt32.t>
   )
     requires validVariablesCount();
     requires validValuesTruthAssignment(oldTau);
@@ -812,7 +812,7 @@ trait DataStructures {
 
     ensures 0 < countTrueLiterals(oldTau, clause);
   {
-    var literal : Int32.t := variable + 1;
+    var literal : SYInt32.t := variable + 1;
     if (oldTau[variable] == 0) {
       literal := -variable-1;
     }
@@ -842,10 +842,10 @@ trait DataStructures {
   }
 
   lemma unsetVariable_countTrueLiteralsDecreasesWithOne(
-    oldTau : seq<Int32.t>,
-    newTau : seq<Int32.t>,
-    variable : Int32.t,
-    clause : seq<Int32.t>
+    oldTau : seq<SYInt32.t>,
+    newTau : seq<SYInt32.t>,
+    variable : SYInt32.t,
+    clause : seq<SYInt32.t>
   )
     requires validVariablesCount();
     requires validValuesTruthAssignment(oldTau);
@@ -855,7 +855,7 @@ trait DataStructures {
     requires oldTau[variable] == 1 ==> variable+1 in clause;
     requires oldTau[variable] == 0 ==> -variable-1 in clause;
 
-    requires forall x : Int32.t :: 0 <= x as int < |oldTau| && x != variable
+    requires forall x : SYInt32.t :: 0 <= x as int < |oldTau| && x != variable
       ==> oldTau[x] == newTau[x];
 
     requires oldTau[variable] in [0, 1];
@@ -913,10 +913,10 @@ trait DataStructures {
   }
 
   lemma unsetVariable_countFalseLiteralsDecreasesWithOne(
-    oldTau : seq<Int32.t>,
-    newTau : seq<Int32.t>,
-    variable : Int32.t,
-    clause : seq<Int32.t>
+    oldTau : seq<SYInt32.t>,
+    newTau : seq<SYInt32.t>,
+    variable : SYInt32.t,
+    clause : seq<SYInt32.t>
   )
     requires validVariablesCount();
     requires validValuesTruthAssignment(oldTau);
@@ -926,7 +926,7 @@ trait DataStructures {
     requires oldTau[variable] == 1 ==> -variable-1 in clause;
     requires oldTau[variable] == 0 ==> variable+1 in clause;
 
-    requires forall x : Int32.t :: 0 <= x as int < |oldTau| && x != variable
+    requires forall x : SYInt32.t :: 0 <= x as int < |oldTau| && x != variable
       ==> oldTau[x] == newTau[x];
 
     requires oldTau[variable] in [0, 1];
@@ -983,11 +983,11 @@ trait DataStructures {
   }
 
   lemma undoImpactedClauses_TFSArraysModified(
-    oldTau : seq<Int32.t>,
-    newTau : seq<Int32.t>,
-    variable : Int32.t,
-    impactedClauses : seq<Int32.t>,
-    impactedClauses' : seq<Int32.t>
+    oldTau : seq<SYInt32.t>,
+    newTau : seq<SYInt32.t>,
+    variable : SYInt32.t,
+    impactedClauses : seq<SYInt32.t>,
+    impactedClauses' : seq<SYInt32.t>
   )
     requires validVariablesCount();
     requires validValuesTruthAssignment(oldTau);
@@ -1006,7 +1006,7 @@ trait DataStructures {
       validPositiveLiteralToClause(variable, impactedClauses');
     requires oldTau[variable] == 0 ==>
       validNegativeLiteralsToClause(variable, impactedClauses);
-    requires forall x : Int32.t :: 0 <= x as int < |oldTau| && x != variable
+    requires forall x : SYInt32.t :: 0 <= x as int < |oldTau| && x != variable
       ==> oldTau[x] == newTau[x];
 
     requires forall clauseIndex :: 0 <= clauseIndex < |clauses| ==>
@@ -1020,12 +1020,12 @@ trait DataStructures {
     requires oldTau[variable] in [0, 1];
     requires newTau[variable] == -1;
 
-    ensures forall clauseIndex : Int32.t :: 0 <= clauseIndex as int < |clauses|
+    ensures forall clauseIndex : SYInt32.t :: 0 <= clauseIndex as int < |clauses|
       && clauseIndex !in impactedClauses ==>
         countTrueLiterals(oldTau, clauses[clauseIndex]) ==
           countTrueLiterals(newTau, clauses[clauseIndex]);
 
-    ensures forall clauseIndex : Int32.t :: 0 <= clauseIndex as int < |clauses|
+    ensures forall clauseIndex : SYInt32.t :: 0 <= clauseIndex as int < |clauses|
       && clauseIndex !in impactedClauses' ==>
         countFalseLiterals(oldTau, clauses[clauseIndex]) ==
           countFalseLiterals(newTau, clauses[clauseIndex]);
@@ -1041,7 +1041,7 @@ trait DataStructures {
     assert getLiteralValue(oldTau, trueLiteral) == 1;
     assert getLiteralValue(oldTau, falseLiteral) == 0;
 
-    forall clauseIndex : Int32.t | 0 <= clauseIndex as int < |clauses|
+    forall clauseIndex : SYInt32.t | 0 <= clauseIndex as int < |clauses|
       ensures clauseIndex !in impactedClauses ==>
         countTrueLiterals(oldTau, clauses[clauseIndex])
           == countTrueLiterals(newTau, clauses[clauseIndex]);
@@ -1098,7 +1098,7 @@ trait DataStructures {
     }
   }
 
-  lemma notDone_literalsToSet(i : Int32.t)
+  lemma notDone_literalsToSet(i : SYInt32.t)
     requires valid();
     requires 0 <= i as int < |clauses|;
     requires falseLiteralsCount[i] as int < |clauses[i]|;
@@ -1134,9 +1134,9 @@ trait DataStructures {
   }
 
   lemma setVariable_unsetVariablesDecreasesWithOne(
-    oldTau : seq<Int32.t>,
-    newTau : seq<Int32.t>,
-    variable : Int32.t
+    oldTau : seq<SYInt32.t>,
+    newTau : seq<SYInt32.t>,
+    variable : SYInt32.t
   )
     requires validVariablesCount();
     requires validVariable(variable);
@@ -1144,7 +1144,7 @@ trait DataStructures {
     requires validValuesTruthAssignment(newTau);
     requires |oldTau| == |newTau|;
 
-    requires forall i : Int32.t :: 0 <= i as int < |oldTau| && i != variable ==>
+    requires forall i : SYInt32.t :: 0 <= i as int < |oldTau| && i != variable ==>
                 oldTau[i] == newTau[i];
 
     requires oldTau[variable] == -1;
@@ -1166,7 +1166,7 @@ trait DataStructures {
     }
   }
 
-  predicate isVariableSet(truthAssignment : seq<Int32.t>, variable : Int32.t)
+  predicate isVariableSet(truthAssignment : seq<SYInt32.t>, variable : SYInt32.t)
     reads this;
     requires validVariablesCount();
     requires validValuesTruthAssignment(truthAssignment);
@@ -1175,18 +1175,18 @@ trait DataStructures {
     truthAssignment[variable] != -1
   }
 
-  predicate isSatisfied(truthAssignment: seq<Int32.t>)
+  predicate isSatisfied(truthAssignment: seq<SYInt32.t>)
     reads `variablesCount, `clauses, `clausesCount,
           `clauseLength, clauseLength;
     requires validVariablesCount();
     requires validClauses();
     requires validValuesTruthAssignment(truthAssignment);
   {
-      forall cI : Int32.t :: 0 <= cI as int < |clauses| ==>
+      forall cI : SYInt32.t :: 0 <= cI as int < |clauses| ==>
         isClauseSatisfied(truthAssignment, cI)
   }
 
-  predicate isExtendingTau(tau : seq<Int32.t>, tau' : seq<Int32.t>)
+  predicate isExtendingTau(tau : seq<SYInt32.t>, tau' : seq<SYInt32.t>)
     reads `variablesCount;
     requires validVariablesCount();
     requires validValuesTruthAssignment(tau);
@@ -1196,7 +1196,7 @@ trait DataStructures {
             tau[i] == tau'[i]
   }
 
-  predicate isTauComplete(tau : seq<Int32.t>)
+  predicate isTauComplete(tau : seq<SYInt32.t>)
     reads `variablesCount;
     requires validVariablesCount();
     requires validValuesTruthAssignment(tau);
@@ -1204,7 +1204,7 @@ trait DataStructures {
     forall i :: 0 <= i < |tau| ==> tau[i] != -1
   }
 
-  function getExtendedCompleteTau(tau : seq<Int32.t>) : seq<Int32.t>
+  function getExtendedCompleteTau(tau : seq<SYInt32.t>) : seq<SYInt32.t>
     reads `variablesCount, `clauses, `clausesCount,
           `clauseLength, clauseLength;
     requires validVariablesCount();
@@ -1230,7 +1230,7 @@ trait DataStructures {
     tau'
   }
 
-  ghost predicate isSatisfiableExtend(tau : seq<Int32.t>)
+  ghost predicate isSatisfiableExtend(tau : seq<SYInt32.t>)
     reads `variablesCount, `clauses, `clausesCount,
           `clauseLength, clauseLength;
     requires validVariablesCount();
@@ -1243,7 +1243,7 @@ trait DataStructures {
                 && isSatisfied(tau')
   }
 
-  predicate isSatisfiableTruthAssignment(tau : seq<Int32.t>, tau':seq<Int32.t>)
+  predicate isSatisfiableTruthAssignment(tau : seq<SYInt32.t>, tau':seq<SYInt32.t>)
     reads `variablesCount, `clauses, `clausesCount,
           `clauseLength, clauseLength;
     requires validVariablesCount();
@@ -1255,7 +1255,7 @@ trait DataStructures {
                 && isSatisfied(tau')
   }
 
-  function isUnitClause(index : Int32.t) : bool
+  function isUnitClause(index : SYInt32.t) : bool
     reads this, traceVariable, traceValue, traceDLStart, 
           traceDLEnd, truthAssignment, trueLiteralsCount,
           falseLiteralsCount, clauseLength;
@@ -1273,7 +1273,7 @@ trait DataStructures {
     clauseLength[index] - falseLiteralsCount[index] == 1
   }
 
-  function isEmptyClause(index : Int32.t) : bool
+  function isEmptyClause(index : SYInt32.t) : bool
     reads this, traceVariable, traceValue, traceDLStart, 
           traceDLEnd, truthAssignment, trueLiteralsCount,
           falseLiteralsCount, clauseLength;

@@ -5,23 +5,23 @@ include "my_datatypes.dfy"
 include "input_predicate.dfy"
 
 module Input {
-    import Int32
+    import SYInt32
     import opened Useless
     import FileInput
     import opened MyDatatypes
     import InputPredicate
 
-    method getInput() returns (result : Maybe<(Int32.t, seq<seq<Int32.t>>)>)
+    method getInput() returns (result : Maybe<(SYInt32.t, seq<seq<SYInt32.t>>)>)
       ensures result.Just? ==>
         InputPredicate.valid(result.value);
     {
       var input := FileInput.Reader.getContent();
-      if (0 < |input| < Int32.max as int) {
+      if (0 < |input| < SYInt32.max as int) {
         var parser := new Parser(input);
         var x := parser.parse();
         return x;
       } else {
-        return Error("the file contains more data than Int32.max");
+        return Error("the file contains more data than SYInt32.max");
       }
     }
 

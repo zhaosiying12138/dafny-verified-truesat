@@ -4,24 +4,24 @@ include "input_predicate.dfy"
 
 module Useless {
   import opened MyDatatypes
-  import Int32
+  import SYInt32
   import InputPredicate
 
   predicate valid'(c : seq<char>) {
-    0 < |c| < Int32.max as int
+    0 < |c| < SYInt32.max as int
   }
 
   class Parser {
     var content : seq<char>;
-    var contentLength : Int32.t;
-    var cursor : Int32.t;
+    var contentLength : SYInt32.t;
+    var cursor : SYInt32.t;
 
     constructor(c : seq<char>) 
       requires valid'(c);
       ensures valid();
     {
       content := c; 
-      contentLength := |c| as Int32.t;
+      contentLength := |c| as SYInt32.t;
       cursor := 0;
     }
 
@@ -65,7 +65,7 @@ module Useless {
       }
     }
 
-    method extractNumber() returns (res : Maybe<Int32.t>)
+    method extractNumber() returns (res : Maybe<SYInt32.t>)
       requires valid();
       requires cursor < contentLength ==>
         (content[cursor] == '-' || ('0' <= content[cursor] <= '9'));
@@ -74,7 +74,7 @@ module Useless {
       ensures old(cursor) <= cursor;
       ensures res.Just? ==> old(cursor) < cursor;
     {
-      var number : Int32.t := 0;
+      var number : SYInt32.t := 0;
       var isNegative : bool := false;
 
       if (cursor < contentLength && content[cursor] == '-') {
@@ -88,14 +88,14 @@ module Useless {
 
       while (cursor < contentLength && ('0' <= content[cursor] <= '9'))
         invariant 0 <= cursor <= contentLength;
-        invariant 0 <= number <= Int32.max as Int32.t;
+        invariant 0 <= number <= SYInt32.max as SYInt32.t;
       {
-        var digit : Int32.t := content[cursor] as Int32.t - '0' as Int32.t;
-        if (number <= (Int32.max as Int32.t - digit) / 10) {
-          assert 0 <= (Int32.max as Int32.t - digit) / 10 - number;
+        var digit : SYInt32.t := content[cursor] as SYInt32.t - '0' as SYInt32.t;
+        if (number <= (SYInt32.max as SYInt32.t - digit) / 10) {
+          assert 0 <= (SYInt32.max as SYInt32.t - digit) / 10 - number;
           number := number * 10 + digit;
         } else {
-          return Error("There is a number bigger than Int32.max");
+          return Error("There is a number bigger than SYInt32.max");
         }
         cursor := cursor + 1;
       }
@@ -108,35 +108,35 @@ module Useless {
       return Just(number);
     }
 
-    method parse() returns (result: Maybe<(Int32.t, seq<seq<Int32.t>>)>)
+    method parse() returns (result: Maybe<(SYInt32.t, seq<seq<SYInt32.t>>)>)
       requires valid();
       modifies `cursor;
 
       ensures result.Just? ==>
         InputPredicate.valid(result.value);
     {
-      var variablesCount : Int32.t := 0;
-      var clausesCount : Int32.t := 0;
-      var clauses : seq<seq<Int32.t>> := [];
-      var clause : array<Int32.t> := new Int32.t[1000];
-      var clauseLength : Int32.t := 0;
+      var variablesCount : SYInt32.t := 0;
+      var clausesCount : SYInt32.t := 0;
+      var clauses : seq<seq<SYInt32.t>> := [];
+      var clause : array<SYInt32.t> := new SYInt32.t[1000];
+      var clauseLength : SYInt32.t := 0;
       var ok := false; 
-      var literalsCount : Int32.t := 0;
+      var literalsCount : SYInt32.t := 0;
 
-      var contentLength : Int32.t := |content| as Int32.t;
+      var contentLength : SYInt32.t := |content| as SYInt32.t;
       while (cursor < contentLength) 
         modifies `cursor, clause;
 
         invariant 0 <= cursor <= contentLength;
         invariant InputPredicate.checkClauses(variablesCount, clauses);
         invariant InputPredicate.sortedClauses(clauses);
-        invariant clause.Length <= Int32.max as int;
+        invariant clause.Length <= SYInt32.max as int;
         invariant forall z :: 0 <= z < clauseLength ==> (
             (clause[z] < 0 && 0 < -clause[z] <= variablesCount) ||
             (clause[z] > 0 && 0 < clause[z] <= variablesCount));
         invariant forall x, y :: 0 <= x < y < clauseLength ==>
             clause[x] < clause[y]
-        invariant ok ==>  0 < variablesCount < Int32.max as Int32.t;
+        invariant ok ==>  0 < variablesCount < SYInt32.max as SYInt32.t;
         invariant InputPredicate.countLiterals(clauses) == literalsCount as int;
 
         decreases contentLength - cursor;
@@ -152,11 +152,11 @@ module Useless {
               return Error(t);
             } 
             case Just(number) => {
-              if (0 < number < Int32.max as Int32.t) {
+              if (0 < number < SYInt32.max as SYInt32.t) {
                 variablesCount := number;
                 ok := true;
               } else {
-                return Error("Variables count is bigger than Int32.max");
+                return Error("Variables count is bigger than SYInt32.max");
               }
             }
           }
@@ -188,7 +188,7 @@ module Useless {
             case Just(number) => {
               if (number == 0 && clauseLength > 0) {
                 clauses := clauses + [clause[..clauseLength]];
-                if (Int32.max as Int32.t - clauseLength > literalsCount) {
+                if (SYInt32.max as SYInt32.t - clauseLength > literalsCount) {
                   literalsCount := literalsCount + clauseLength;
                 } else {
                   return Error("The number of literals is to big");
@@ -201,7 +201,7 @@ module Useless {
                       (number > 0 && 0 < number <= variablesCount)) {
                     clause[clauseLength] := number;
                     clauseLength := clauseLength + 1;
-                    var k : Int32.t := clauseLength-1;
+                    var k : SYInt32.t := clauseLength-1;
                     while (0 < k && clause[k-1] > clause[k]) 
                       modifies clause;
                       invariant 0 <= k <= clauseLength; 
@@ -238,7 +238,7 @@ module Useless {
         }
       }
 
-      if (!(0 < |clauses| < Int32.max as int)) {
+      if (!(0 < |clauses| < SYInt32.max as int)) {
         return Error("number of clauses incorrect");
       }
 

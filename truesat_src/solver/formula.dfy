@@ -5,8 +5,8 @@ include "../input_predicate.dfy"
 
 class Formula extends DataStructures {
   constructor(
-    variablesCount : Int32.t,
-    clauses : seq<seq<Int32.t>>
+    variablesCount : SYInt32.t,
+    clauses : seq<seq<SYInt32.t>>
   )
     requires InputPredicate.valid((variablesCount, clauses));
 
@@ -21,8 +21,8 @@ class Formula extends DataStructures {
 
     ensures this.decisionLevel == -1;
   {
-    assert 0 < variablesCount < Int32.max as Int32.t;
-    assert 0 < |clauses| <= Int32.max as int;
+    assert 0 < variablesCount < SYInt32.max as SYInt32.t;
+    assert 0 < |clauses| <= SYInt32.max as int;
     assert forall clause :: (clause in clauses) ==>
                forall literal :: (literal in clause) ==> (
                  (literal < 0 && 0 < -literal <= variablesCount) ||
@@ -31,39 +31,39 @@ class Formula extends DataStructures {
     this.clauses := clauses;
     this.decisionLevel := -1;
 
-    this.traceVariable := new Int32.t[variablesCount];
+    this.traceVariable := new SYInt32.t[variablesCount];
     this.traceValue := new bool[variablesCount];
-    this.traceDLStart := new Int32.t[variablesCount];
-    this.traceDLEnd := new Int32.t[variablesCount];
+    this.traceDLStart := new SYInt32.t[variablesCount];
+    this.traceDLEnd := new SYInt32.t[variablesCount];
     this.assignmentsTrace := {};
 
-    var clsLength := |clauses| as Int32.t;
+    var clsLength := |clauses| as SYInt32.t;
     this.clausesCount := clsLength;
-    this.clauseLength := new Int32.t[clsLength];
+    this.clauseLength := new SYInt32.t[clsLength];
 
-    this.trueLiteralsCount := new Int32.t[clsLength];
-    this.falseLiteralsCount := new Int32.t[clsLength];
+    this.trueLiteralsCount := new SYInt32.t[clsLength];
+    this.falseLiteralsCount := new SYInt32.t[clsLength];
 
-    this.positiveLiteralsToClauses := new seq<Int32.t>[variablesCount];
-    this.negativeLiteralsToClauses := new seq<Int32.t>[variablesCount];
+    this.positiveLiteralsToClauses := new seq<SYInt32.t>[variablesCount];
+    this.negativeLiteralsToClauses := new seq<SYInt32.t>[variablesCount];
 
-    this.truthAssignment := new Int32.t[variablesCount];
+    this.truthAssignment := new SYInt32.t[variablesCount];
 
     new;
 
-    var k : Int32.t := 0;
+    var k : SYInt32.t := 0;
     while (k < this.clausesCount)
       modifies this.clauseLength;
       invariant this.clauseLength.Length == this.clausesCount as int;
-      invariant (forall i : Int32.t :: 0 <= i < k <= this.clausesCount ==>
+      invariant (forall i : SYInt32.t :: 0 <= i < k <= this.clausesCount ==>
                   this.clauseLength[i] as int == |clauses[i]|);
       invariant 0 <= k <= this.clausesCount;
     {
-      this.clauseLength[k] := |this.clauses[k]| as Int32.t;
+      this.clauseLength[k] := |this.clauses[k]| as SYInt32.t;
       k := k + 1;
     }
 
-    var index : Int32.t := 0;
+    var index : SYInt32.t := 0;
     while (index < variablesCount)
       modifies truthAssignment;
       invariant 0 <= index <= variablesCount;
@@ -86,7 +86,7 @@ class Formula extends DataStructures {
     assert countLiterals(clausesCount) == InputPredicate.countLiterals(clauses);
   }
 
-  lemma inputPredicate_countLiterals(cI : Int32.t)
+  lemma inputPredicate_countLiterals(cI : SYInt32.t)
     requires validVariablesCount();
     requires validClauses();
     requires 0 <= cI <= clausesCount;
@@ -122,7 +122,7 @@ class Formula extends DataStructures {
     ensures validTrueLiteralsCount(truthAssignment[..]);
     ensures validFalseLiteralsCount(truthAssignment[..]);
   {
-    var i : Int32.t := 0;
+    var i : SYInt32.t := 0;
 
     while (i < clausesCount)
       invariant 0 <= i <= clausesCount;
@@ -168,7 +168,7 @@ class Formula extends DataStructures {
     {
       positiveLiteralsToClauses[variable] := [];
 
-      var clauseIndex : Int32.t := 0;
+      var clauseIndex : SYInt32.t := 0;
       while (clauseIndex < clausesCount)
         invariant 0 <= clauseIndex <= clausesCount;
 
@@ -212,7 +212,7 @@ class Formula extends DataStructures {
 
     ensures validNegativeLiteralsToClauses();
   {
-    var variable : Int32.t := 0;
+    var variable : SYInt32.t := 0;
 
     while (variable < variablesCount)
       invariant 0 <= variable <= variablesCount;
@@ -225,7 +225,7 @@ class Formula extends DataStructures {
     {
       negativeLiteralsToClauses[variable] := [];
 
-      var clauseIndex : Int32.t := 0;
+      var clauseIndex : SYInt32.t := 0;
       while (clauseIndex < clausesCount)
         invariant 0 <= clauseIndex <= clausesCount;
 
@@ -277,7 +277,7 @@ class Formula extends DataStructures {
     ensures decisionLevel > -1 ==>
       traceDLStart[decisionLevel] < traceDLEnd[decisionLevel];
   {
-    ghost var k : Int32.t := traceDLEnd[decisionLevel]-1;
+    ghost var k : SYInt32.t := traceDLEnd[decisionLevel]-1;
 
     while (traceDLStart[decisionLevel] < traceDLEnd[decisionLevel])
       modifies `assignmentsTrace, traceDLEnd, truthAssignment,
@@ -312,7 +312,7 @@ class Formula extends DataStructures {
       old(getDecisionLevel(i)) == getDecisionLevel(i);
   {
     forall_validAssignmentTrace_traceDLEndStrictlyOrdered();
-    var k : Int32.t := traceDLEnd[decisionLevel]-1;
+    var k : SYInt32.t := traceDLEnd[decisionLevel]-1;
     var variable := traceVariable[k];
     var value := traceValue[k];
 
@@ -328,8 +328,8 @@ class Formula extends DataStructures {
     assert forall i :: 0 <= i < decisionLevel ==>
       old(getDecisionLevel(i)) == getDecisionLevel(i);
 
-    var positivelyImpactedClauses : seq<Int32.t> := positiveLiteralsToClauses[variable]; // decrease true counter
-    var negativelyImpactedClauses : seq<Int32.t> := negativeLiteralsToClauses[variable];  // decrease false counters
+    var positivelyImpactedClauses : seq<SYInt32.t> := positiveLiteralsToClauses[variable]; // decrease true counter
+    var negativelyImpactedClauses : seq<SYInt32.t> := negativeLiteralsToClauses[variable];  // decrease false counters
 
     if (!value) {
       negativelyImpactedClauses := positiveLiteralsToClauses[variable]; // decrease true counter
@@ -347,8 +347,8 @@ class Formula extends DataStructures {
       negativelyImpactedClauses
     );
 
-    var i : Int32.t := 0;
-    var len := |positivelyImpactedClauses| as Int32.t;
+    var i : SYInt32.t := 0;
+    var len := |positivelyImpactedClauses| as SYInt32.t;
     while (i < len)
       modifies trueLiteralsCount;
 
@@ -378,7 +378,7 @@ class Formula extends DataStructures {
     }
 
     assert trueLiteralsCount.Length == |clauses|;
-    forall i : Int32.t | 0 <= i as int < |clauses|
+    forall i : SYInt32.t | 0 <= i as int < |clauses|
       ensures trueLiteralsCount[i] == countTrueLiterals(newTau, clauses[i])
     {
       if (i !in positivelyImpactedClauses)
@@ -387,7 +387,7 @@ class Formula extends DataStructures {
       }
       else
       {
-        var j : Int32.t :| 0 <= j as int < |positivelyImpactedClauses| && positivelyImpactedClauses[j] == i;
+        var j : SYInt32.t :| 0 <= j as int < |positivelyImpactedClauses| && positivelyImpactedClauses[j] == i;
         assert trueLiteralsCount[i] == countTrueLiterals(newTau, clauses[i]);
       }
     }
@@ -395,7 +395,7 @@ class Formula extends DataStructures {
 
     i := 0;
 
-    len := |negativelyImpactedClauses| as Int32.t;
+    len := |negativelyImpactedClauses| as SYInt32.t;
     modify falseLiteralsCount {
     while (i < len)
       modifies falseLiteralsCount;
@@ -436,7 +436,7 @@ class Formula extends DataStructures {
     }
     }
     assert falseLiteralsCount.Length == |clauses|;
-    forall i : Int32.t | 0 <= i as int < |clauses|
+    forall i : SYInt32.t | 0 <= i as int < |clauses|
       ensures falseLiteralsCount[i] == countFalseLiterals(newTau, clauses[i])
     {
       if (i !in negativelyImpactedClauses)
@@ -445,7 +445,7 @@ class Formula extends DataStructures {
       }
       else
       {
-        var j : Int32.t :| 0 <= j as int < |negativelyImpactedClauses| && negativelyImpactedClauses[j] == i;
+        var j : SYInt32.t :| 0 <= j as int < |negativelyImpactedClauses| && negativelyImpactedClauses[j] == i;
         assert falseLiteralsCount[i] == countFalseLiterals(newTau, clauses[i]);
       }
     }
@@ -453,7 +453,7 @@ class Formula extends DataStructures {
     assert old(traceVariable[..]) == traceVariable[..];
   }
 
-  method setVariable(variable : Int32.t, value : bool)
+  method setVariable(variable : SYInt32.t, value : bool)
     requires valid();
     requires validVariable(variable);
     requires truthAssignment[variable] == -1;
@@ -485,7 +485,7 @@ class Formula extends DataStructures {
     ensures countUnsetVariables(truthAssignment[..]) + 1 ==
       old(countUnsetVariables(truthAssignment[..]));
   {
-    ghost var oldTau : seq<Int32.t> := truthAssignment[..];
+    ghost var oldTau : seq<SYInt32.t> := truthAssignment[..];
 
     existsUnsetLiteral_traceNotFull(variable);
 
@@ -511,7 +511,7 @@ class Formula extends DataStructures {
     assert getLiteralValue(newTau, trueLiteral) == 1;
     assert getLiteralValue(newTau, falseLiteral) == 0;
 
-    var i : Int32.t := 0;
+    var i : SYInt32.t := 0;
 
     var impactedClauses := positiveLiteralsToClauses[variable];
     var impactedClauses' := negativeLiteralsToClauses[variable];
@@ -529,13 +529,13 @@ class Formula extends DataStructures {
       impactedClauses'
     );
 
-    var impactedClausesLen : Int32.t := |impactedClauses| as Int32.t;
+    var impactedClausesLen : SYInt32.t := |impactedClauses| as SYInt32.t;
     while (i < impactedClausesLen)
       modifies trueLiteralsCount;
 
       invariant 0 <= i <= impactedClausesLen;
 
-      invariant forall j : Int32.t :: 0 <= j < clausesCount && j !in impactedClauses
+      invariant forall j : SYInt32.t :: 0 <= j < clausesCount && j !in impactedClauses
         ==> trueLiteralsCount[j] == countTrueLiterals(newTau, clauses[j]);
 
       invariant forall j :: 0 <= j < i ==>
@@ -568,7 +568,7 @@ class Formula extends DataStructures {
     }
 
     assert trueLiteralsCount.Length == |clauses|;
-    forall i : Int32.t | 0 <= i as int < |clauses|
+    forall i : SYInt32.t | 0 <= i as int < |clauses|
       ensures trueLiteralsCount[i] == countTrueLiterals(newTau, clauses[i])
     {
       if (i !in impactedClauses)
@@ -577,22 +577,22 @@ class Formula extends DataStructures {
       }
       else
       {
-        var j : Int32.t :| 0 <= j as int < |impactedClauses| && impactedClauses[j] == i;
+        var j : SYInt32.t :| 0 <= j as int < |impactedClauses| && impactedClauses[j] == i;
         assert trueLiteralsCount[i] == countTrueLiterals(newTau, clauses[i]);
       }
     }
     assert newTau == truthAssignment[..];
     assert validTrueLiteralsCount(truthAssignment[..]);
 
-    var i' : Int32.t := 0;
+    var i' : SYInt32.t := 0;
 
-    var impactedClausesLen' : Int32.t := |impactedClauses'| as Int32.t;
+    var impactedClausesLen' : SYInt32.t := |impactedClauses'| as SYInt32.t;
     while (i' < impactedClausesLen')
       modifies falseLiteralsCount;
 
       invariant 0 <= i' <= impactedClausesLen';
 
-      invariant forall j : Int32.t :: 0 <= j < clausesCount && j !in impactedClauses'
+      invariant forall j : SYInt32.t :: 0 <= j < clausesCount && j !in impactedClauses'
         ==> falseLiteralsCount[j] == countFalseLiterals(newTau, clauses[j]);
 
       invariant forall j :: 0 <= j < i' ==>
@@ -621,7 +621,7 @@ class Formula extends DataStructures {
     }
 
     assert falseLiteralsCount.Length == |clauses|;
-    forall i : Int32.t | 0 <= i as int < |clauses|
+    forall i : SYInt32.t | 0 <= i as int < |clauses|
       ensures falseLiteralsCount[i] == countFalseLiterals(newTau, clauses[i])
     {
       if (i !in impactedClauses)
@@ -630,7 +630,7 @@ class Formula extends DataStructures {
       }
       else
       {
-        var j : Int32.t :| 0 <= j as int < |impactedClauses| && impactedClauses[j] == i;
+        var j : SYInt32.t :| 0 <= j as int < |impactedClauses| && impactedClauses[j] == i;
         assert falseLiteralsCount[i] == countFalseLiterals(newTau, clauses[i]);
       }
     }
@@ -641,7 +641,7 @@ class Formula extends DataStructures {
     setVariable_unsetVariablesDecreasesWithOne(oldTau, newTau, variable);
   }
 
-  lemma traceFull_variableInTrace(variable : Int32.t)
+  lemma traceFull_variableInTrace(variable : SYInt32.t)
     requires valid();
     requires validVariable(variable);
     requires 0 <= decisionLevel;
@@ -650,8 +650,8 @@ class Formula extends DataStructures {
     ensures exists i :: 0 <= i < traceDLEnd[decisionLevel] &&
       traceVariable[i] == variable;
   {
-    var L : set<Int32.t>, R : set<Int32.t> := {}, Utils.RangeSet(0, variablesCount);
-    var i : Int32.t := 0;
+    var L : set<SYInt32.t>, R : set<SYInt32.t> := {}, Utils.RangeSet(0, variablesCount);
+    var i : SYInt32.t := 0;
     Utils.CardinalityRangeSet(0, variablesCount);
 
     while (i < variablesCount)
@@ -670,7 +670,7 @@ class Formula extends DataStructures {
     assert variable in L;
   }
 
-  lemma existsUnsetLiteral_traceNotFull(variable : Int32.t)
+  lemma existsUnsetLiteral_traceNotFull(variable : SYInt32.t)
     requires valid();
     requires validVariable(variable);
     requires truthAssignment[variable] == -1;
@@ -711,7 +711,7 @@ class Formula extends DataStructures {
     }
   }
 
-  method addAssignment(variable : Int32.t, value : bool)
+  method addAssignment(variable : SYInt32.t, value : bool)
     requires validVariablesCount();
     requires validAssignmentTrace();
     requires 0 <= decisionLevel;
@@ -761,7 +761,7 @@ class Formula extends DataStructures {
     }
   }
 
-  lemma validAssignmentTrace_traceDLStartStrictlyOrdered(i : Int32.t, j : Int32.t)
+  lemma validAssignmentTrace_traceDLStartStrictlyOrdered(i : SYInt32.t, j : SYInt32.t)
     requires validVariablesCount();
     requires validAssignmentTrace();
     requires 0 <= i < j <= decisionLevel;
@@ -794,7 +794,7 @@ class Formula extends DataStructures {
     }
   }
 
-  lemma validAssignmentTrace_traceDLEndStrictlyOrdered(i : Int32.t)
+  lemma validAssignmentTrace_traceDLEndStrictlyOrdered(i : SYInt32.t)
     requires validVariablesCount();
     requires validAssignmentTrace();
     requires 0 <= i < decisionLevel;
@@ -827,7 +827,7 @@ class Formula extends DataStructures {
   {
     decisionLevel := decisionLevel + 1;
 
-    var previous : Int32.t := 0;
+    var previous : SYInt32.t := 0;
     if (decisionLevel == 0) {
       previous := 0;
     } else {
@@ -840,7 +840,7 @@ class Formula extends DataStructures {
     assert old(traceVariable[..]) == traceVariable[..];
   }
 
-  ghost function getDecisionLevel(dL : Int32.t) : set<(Int32.t, bool)>
+  ghost function getDecisionLevel(dL : SYInt32.t) : set<(SYInt32.t, bool)>
     reads `variablesCount, `decisionLevel, `traceDLStart,
           `traceDLEnd, `traceVariable, `traceValue,
           traceDLStart, traceDLEnd, traceVariable,
@@ -855,7 +855,7 @@ class Formula extends DataStructures {
     else (set j | j in assignmentsTrace && j.0 in traceVariable[traceDLStart[dL]..traceDLEnd[dL]])
   }
 
-  method extractUnsetLiteralFromClause(clauseIndex : Int32.t) returns (literal : Int32.t)
+  method extractUnsetLiteralFromClause(clauseIndex : SYInt32.t) returns (literal : SYInt32.t)
     requires valid();
     requires 0 <= clauseIndex < clausesCount;
     requires falseLiteralsCount[clauseIndex] < clauseLength[clauseIndex];
@@ -868,7 +868,7 @@ class Formula extends DataStructures {
   {
     unitClause_existsUnsetLiteral(clauseIndex);
 
-    var i : Int32.t := 0;
+    var i : SYInt32.t := 0;
 
     var clause := clauses[clauseIndex];
     while (i < clauseLength[clauseIndex])
@@ -888,7 +888,7 @@ class Formula extends DataStructures {
     assert false;
   }
 
-  method propagate(clauseIndex : Int32.t)
+  method propagate(clauseIndex : SYInt32.t)
     requires valid();
     requires 0 <= decisionLevel; // not empty
     requires 0 <= clauseIndex < clausesCount;
@@ -948,7 +948,7 @@ class Formula extends DataStructures {
       old(countUnsetVariables(truthAssignment[..]));
   }
 
-  method unitPropagation(variable : Int32.t, value : bool)
+  method unitPropagation(variable : SYInt32.t, value : bool)
     requires valid();
     requires validVariable(variable);
     requires 0 <= decisionLevel; // not empty
@@ -984,8 +984,8 @@ class Formula extends DataStructures {
     if (!value) {
       negativelyImpactedClauses := positiveLiteralsToClauses[variable];
     }
-    var k : Int32.t := 0;
-    var negativelyImpactedClausesLen : Int32.t := |negativelyImpactedClauses| as Int32.t;
+    var k : SYInt32.t := 0;
+    var negativelyImpactedClausesLen : SYInt32.t := |negativelyImpactedClauses| as SYInt32.t;
 
     while (k < negativelyImpactedClausesLen)
       invariant 0 <= k <= negativelyImpactedClausesLen;
@@ -1017,7 +1017,7 @@ class Formula extends DataStructures {
     }
   }
 
-  method setLiteral(literal : Int32.t, value : bool)
+  method setLiteral(literal : SYInt32.t, value : bool)
     requires valid();
     requires validLiteral(literal);
     requires getLiteralValue(truthAssignment[..], literal) == -1;
@@ -1055,7 +1055,7 @@ class Formula extends DataStructures {
     unitPropagation(variable, value');
   }
 
-  method chooseLiteral() returns (x : Int32.t)
+  method chooseLiteral() returns (x : SYInt32.t)
     requires valid();
     requires !hasEmptyClause();
     requires !isEmpty();
@@ -1067,15 +1067,15 @@ class Formula extends DataStructures {
   {
     notEmptyNoEmptyClauses_existUnsetLiteralInClauses();
 
-    var minim : Int32.t := Int32.max as Int32.t;
-    var counter : Int32.t := 0;
-    var result : Int32.t := -1;
+    var minim : SYInt32.t := SYInt32.max as SYInt32.t;
+    var counter : SYInt32.t := 0;
+    var result : SYInt32.t := -1;
     var ok := false;
 
-    var cI : Int32.t := 0;
+    var cI : SYInt32.t := 0;
     while (cI < clausesCount)
       invariant 0 <= cI <= clausesCount;
-      invariant !ok ==> counter == 0 && minim == Int32.max as Int32.t && (exists i', k' ::
+      invariant !ok ==> counter == 0 && minim == SYInt32.max as SYInt32.t && (exists i', k' ::
         cI <= i' < clausesCount &&
         0 <= k' < |clauses[i']| &&
         trueLiteralsCount[i'] == 0 &&
@@ -1103,7 +1103,7 @@ class Formula extends DataStructures {
       if (trueLiteralsCount[cI] == 0 && diff == minim) {
         assert validClause(clauses[cI]);
 
-        var lI : Int32.t := 0;
+        var lI : SYInt32.t := 0;
         while (lI < clauseLength[cI])
           invariant 0 <= lI <= clauseLength[cI];
           invariant !ok ==> counter == 0 && (exists k' ::
@@ -1148,7 +1148,7 @@ class Formula extends DataStructures {
     return -result;
   }
 
-  lemma maybeClause_existUnsetLiteralInClause(clauseIndex : Int32.t)
+  lemma maybeClause_existUnsetLiteralInClause(clauseIndex : SYInt32.t)
     requires valid();
     requires 0 <= clauseIndex < clausesCount;
     requires trueLiteralsCount[clauseIndex] == 0
@@ -1167,7 +1167,7 @@ class Formula extends DataStructures {
     var k := clauseLen - 1;
     var flc := 0;
     var ok := false;
-    var index : Int32.t := 0;
+    var index : SYInt32.t := 0;
 
     assert clauseLen > 0;
 
@@ -1236,7 +1236,7 @@ class Formula extends DataStructures {
       forall i :: 0 <= i < |clauses| ==>
         falseLiteralsCount[i] as int < |clauses[i]|;
   {
-    if i : Int32.t :| 0 <= i < clausesCount && falseLiteralsCount[i] == clauseLength[i]
+    if i : SYInt32.t :| 0 <= i < clausesCount && falseLiteralsCount[i] == clauseLength[i]
       then true
       else false
   }
@@ -1253,7 +1253,7 @@ class Formula extends DataStructures {
       forall i :: 0 <= i < clausesCount ==>
         falseLiteralsCount[i] < clauseLength[i];
   {
-    var k : Int32.t := 0;
+    var k : SYInt32.t := 0;
     while (k < clausesCount)
       invariant 0 <= k <= clausesCount;
       invariant forall k' :: 0 <= k' < k ==>
@@ -1282,7 +1282,7 @@ class Formula extends DataStructures {
       exists i :: 0 <= i < |clauses|
                && trueLiteralsCount[i] == 0;
   {
-    if i : Int32.t :| 0 <= i < clausesCount && trueLiteralsCount[i] == 0
+    if i : SYInt32.t :| 0 <= i < clausesCount && trueLiteralsCount[i] == 0
       then false
       else true
   }
@@ -1299,7 +1299,7 @@ class Formula extends DataStructures {
       exists i :: 0 <= i < clausesCount
                && trueLiteralsCount[i] == 0;
   {
-    var k : Int32.t := 0;
+    var k : SYInt32.t := 0;
     while (k < clausesCount)
       invariant 0 <= k <= clausesCount;
       invariant forall k' :: 0 <= k' < k ==>
@@ -1390,7 +1390,7 @@ class Formula extends DataStructures {
     }
   }
 
-  predicate occursInTrace(variable : Int32.t)
+  predicate occursInTrace(variable : SYInt32.t)
     reads this, traceDLStart, traceDLEnd, traceVariable, traceValue,
           truthAssignment, trueLiteralsCount,
           falseLiteralsCount, clauseLength,
@@ -1403,7 +1403,7 @@ class Formula extends DataStructures {
       traceVariable[j] == variable
   }
 
-  ghost predicate occursInAssignmentsTrace(variable : Int32.t)
+  ghost predicate occursInAssignmentsTrace(variable : SYInt32.t)
     reads this, traceDLStart, traceDLEnd, traceVariable, traceValue,
           truthAssignment, trueLiteralsCount,
           falseLiteralsCount, clauseLength,
@@ -1432,8 +1432,8 @@ class Formula extends DataStructures {
     ensures forall v :: 0 <= v < variablesCount ==>
       occursInAssignmentsTrace(v);
   {
-    var L: set<Int32.t>, R: set<Int32.t> := {}, Utils.RangeSet(0, variablesCount);
-    var i : Int32.t := 0;
+    var L: set<SYInt32.t>, R: set<SYInt32.t> := {}, Utils.RangeSet(0, variablesCount);
+    var i : SYInt32.t := 0;
     Utils.CardinalityRangeSet(0, variablesCount);
 
     forall_validAssignmentTrace_traceDLStartStrictlyOrdered();
@@ -1545,7 +1545,7 @@ class Formula extends DataStructures {
     }
   }
 
-  lemma existsTrueLiteral_countTrueLiteralsPositive(clause : seq<Int32.t>, truthAssignment : seq<Int32.t>)
+  lemma existsTrueLiteral_countTrueLiteralsPositive(clause : seq<SYInt32.t>, truthAssignment : seq<SYInt32.t>)
     requires valid();
     requires validValuesTruthAssignment(truthAssignment);
     requires validClause(clause);
@@ -1564,7 +1564,7 @@ class Formula extends DataStructures {
 
 
 
-  lemma unitClause_existsUnsetLiteral(clauseIndex : Int32.t)
+  lemma unitClause_existsUnsetLiteral(clauseIndex : SYInt32.t)
     requires valid();
     requires 0 <= clauseIndex as int < |clauses|;
     requires validClause(clauses[clauseIndex]);
@@ -1584,7 +1584,7 @@ class Formula extends DataStructures {
     ensures !isSatisfiableExtend(truthAssignment[..]);
   {
     var tau := truthAssignment[..];
-    var clauseIndex : Int32.t :| 0 <= clauseIndex as int < |clauses|
+    var clauseIndex : SYInt32.t :| 0 <= clauseIndex as int < |clauses|
                && falseLiteralsCount[clauseIndex] as int == |clauses[clauseIndex]|;
     var clause := clauses[clauseIndex];
     assert validClause(clause);
@@ -1601,7 +1601,7 @@ class Formula extends DataStructures {
     }
   }
 
-  lemma allLiteralsSetToFalse_clauseUnsatisfied(clauseIndex : Int32.t)
+  lemma allLiteralsSetToFalse_clauseUnsatisfied(clauseIndex : SYInt32.t)
     requires valid();
     requires 0 <= clauseIndex as int < |clauses|;
     requires falseLiteralsCount[clauseIndex] as int == |clauses[clauseIndex]|;
@@ -1611,7 +1611,7 @@ class Formula extends DataStructures {
               getLiteralValue(truthAssignment[..], literal) == 0;
   {
     var clause := clauses[clauseIndex];
-    var k : Int32.t := 0;
+    var k : SYInt32.t := 0;
     var flc := 0;
     var tau := truthAssignment[..];
 
@@ -1637,7 +1637,7 @@ class Formula extends DataStructures {
     assert forall i :: 0 <= i < |clauses| ==>
         trueLiteralsCount[i] > 0;
 
-    forall i : Int32.t | 0 <= i as int < |clauses|
+    forall i : SYInt32.t | 0 <= i as int < |clauses|
       ensures isClauseSatisfied(truthAssignment[..], i);
     {
       countTrueLiteralsX_existsTrueLiteral(truthAssignment[..], clauses[i]);
@@ -1650,7 +1650,7 @@ class Formula extends DataStructures {
     partialTauSatisfied_isSatisfiableExtend(truthAssignment[..]);
   }
 
-  lemma partialTauSatisfied_isSatisfiableExtend(tau : seq<Int32.t>)
+  lemma partialTauSatisfied_isSatisfiableExtend(tau : seq<SYInt32.t>)
     requires validVariablesCount();
     requires validValuesTruthAssignment(tau);
     requires validClauses();
@@ -1663,7 +1663,7 @@ class Formula extends DataStructures {
     } else {
       var x :| 0 <= x < |tau| && tau[x] == -1;
       var tau' := tau[x := 0];
-      forall i : Int32.t | 0 <= i as int < |clauses|
+      forall i : SYInt32.t | 0 <= i as int < |clauses|
         ensures isClauseSatisfied(tau', i);
       {
         assert isClauseSatisfied(tau, i);
@@ -1687,9 +1687,9 @@ class Formula extends DataStructures {
   }
 
   lemma unitClause_allFalseExceptLiteral(
-    truthAssignment : seq<Int32.t>,
-    clauseIndex : Int32.t,
-    literal : Int32.t
+    truthAssignment : seq<SYInt32.t>,
+    clauseIndex : SYInt32.t,
+    literal : SYInt32.t
   )
     requires validVariablesCount();
     requires validClauses();
@@ -1750,9 +1750,9 @@ class Formula extends DataStructures {
   }
 
   lemma unitClauseLiteralFalse_tauNotSatisfiable(
-    truthAssignment : seq<Int32.t>,
-    clauseIndex : Int32.t,
-    literal : Int32.t
+    truthAssignment : seq<SYInt32.t>,
+    clauseIndex : SYInt32.t,
+    literal : SYInt32.t
   )
     requires validVariablesCount();
     requires validClauses();
@@ -1829,10 +1829,10 @@ class Formula extends DataStructures {
   }
 
   lemma variableSet_countUnsetVariablesLessThanLength(
-    tau : seq<Int32.t>,
-    variable : Int32.t
+    tau : seq<SYInt32.t>,
+    variable : SYInt32.t
   )
-    requires |tau| <= Int32.max as int;
+    requires |tau| <= SYInt32.max as int;
     requires 0 <= variable as int < |tau|;
     requires tau[variable] in [0, 1];
     ensures countUnsetVariables(tau) as int < |tau|;
@@ -1857,9 +1857,9 @@ class Formula extends DataStructures {
   }
 
   lemma unsetVariable_countTrueLiteralsLessThanLength(
-    tau : seq<Int32.t>,
-    variable : Int32.t,
-    clause : seq<Int32.t>
+    tau : seq<SYInt32.t>,
+    variable : SYInt32.t,
+    clause : seq<SYInt32.t>
   )
     requires validVariablesCount();
     requires validValuesTruthAssignment(tau);
@@ -1869,7 +1869,7 @@ class Formula extends DataStructures {
     requires variable+1 in clause || -variable-1 in clause;
     ensures countTrueLiterals(tau, clause) as int < |clause|;
   {
-    var literal : Int32.t := variable + 1;
+    var literal : SYInt32.t := variable + 1;
     if (variable+1 !in clause) {
       literal := -variable-1;
     }
@@ -1903,7 +1903,7 @@ class Formula extends DataStructures {
     }
   }
 
-  lemma unsetVariable_countFalseLiteralsLessThanLength(tau : seq<Int32.t>, variable : Int32.t, clause : seq<Int32.t>)
+  lemma unsetVariable_countFalseLiteralsLessThanLength(tau : seq<SYInt32.t>, variable : SYInt32.t, clause : seq<SYInt32.t>)
     requires validVariablesCount();
     requires validValuesTruthAssignment(tau);
     requires validClause(clause);
@@ -1912,7 +1912,7 @@ class Formula extends DataStructures {
     requires variable+1 in clause || -variable-1 in clause;
     ensures countFalseLiterals(tau, clause) as int < |clause|;
   {
-    var literal : Int32.t := variable + 1;
+    var literal : SYInt32.t := variable + 1;
     if (variable+1 !in clause) {
       literal := -variable-1;
     }
@@ -1947,8 +1947,8 @@ class Formula extends DataStructures {
   }
 
   lemma forVariableNotSatisfiableExtend_notSatisfiableExtend(
-    tau : seq<Int32.t>,
-    variable : Int32.t
+    tau : seq<SYInt32.t>,
+    variable : SYInt32.t
   )
     requires validVariablesCount();
     requires validClauses();
@@ -1972,9 +1972,9 @@ class Formula extends DataStructures {
   }
 
   lemma extensionSatisfiable_baseSatisfiable(
-    tau : seq<Int32.t>,
-    variable : Int32.t,
-    value : Int32.t
+    tau : seq<SYInt32.t>,
+    variable : SYInt32.t,
+    value : SYInt32.t
   )
     requires validVariablesCount();
     requires validClauses();
