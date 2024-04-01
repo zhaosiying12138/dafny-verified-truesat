@@ -1225,7 +1225,7 @@ trait DataStructures {
     //     && isTauComplete(tau')
     //     && isExtendingTau(tau, tau')
     //     && isSatisfied(tau');
-    var tau' := getExtendedCompleteTau(tau);
+    var tau' := getExtendedCompleteTau(tau); // [SY_Debug] Buggy!
 
     tau'
   }

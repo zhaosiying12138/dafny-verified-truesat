@@ -1,5 +1,5 @@
 verify:
-	dafny /compile:0 /vcsCores:24 /errorLimit:1 /trace *.dfy solver/*.dfy
+	dafny /timeLimit:5 /compile:0 /vcsCores:24 /errorLimit:1 /trace *.dfy solver/*.dfy
 
 verifysingle:
 	dafny /compile:0 /vcsCores:1 /errorLimit:1 /trace *.dfy solver/*.dfy
