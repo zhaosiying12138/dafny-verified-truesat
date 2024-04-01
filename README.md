@@ -13,9 +13,9 @@ dotnet run test01.cnf
 
 ## 2. Logs  
 ### 1. make verify
-![](./demo/01.png)  
+![](./truesat_src/demo/dafny01.png)  
 ### 2. dotnet run
-![](./demo/02.png)  
+![](./truesat_src/demo/dafny02.png)  
 
 ## 3. Acknownledgement  
 [Andrici C C, Ciobâcă Ș. A Verified Implementation of the DPLL Algorithm in Dafny[J]. Mathematics, 2022, 10(13): 2264.](https://github.com/andricicezar/truesat)  
