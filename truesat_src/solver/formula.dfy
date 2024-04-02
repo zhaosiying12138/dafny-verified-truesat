@@ -371,6 +371,7 @@ class Formula extends DataStructures {
       ghost var clause := clauses[clauseIndex];
       assert validClause(clause);
 
+      unsetVariable_countTrueLiteralsLessThanLength(newTau, variable, clauses[clauseIndex]);
       unsetVariable_countTrueLiteralsDecreasesWithOne(previousTau, newTau, variable, clause);
       trueLiteralsCount[clauseIndex] := trueLiteralsCount[clauseIndex] - 1;
 
@@ -430,6 +431,7 @@ class Formula extends DataStructures {
     {
       var clauseIndex := negativelyImpactedClauses[i];
 
+      unsetVariable_countFalseLiteralsLessThanLength(newTau, variable, clauses[clauseIndex]);
       unsetVariable_countFalseLiteralsDecreasesWithOne(previousTau, newTau, variable, clauses[clauseIndex]);
       falseLiteralsCount[clauseIndex] := falseLiteralsCount[clauseIndex] - 1;
       i := i + 1;

@@ -133,6 +133,7 @@ trait DataStructures {
 
       && 
 
+      // [SY_Debug] I doubt about that
       (0 <= traceDLStart[decisionLevel] <= traceDLEnd[decisionLevel] <= variablesCount)
     ))
 
@@ -556,9 +557,12 @@ trait DataStructures {
     } else {
       calc < {
         countLiterals(cI); 
-        { assert countLiterals(cI + 1) == countLiterals(cI) + clauseLength[cI] as int;
-          assert clauseLength[cI] > 0; }
-        countLiterals(cI+1); { countLiterals_monotone(cI+1); }
+        {
+          assert countLiterals(cI + 1) == countLiterals(cI) + clauseLength[cI] as int;
+          assert clauseLength[cI] > 0;
+        }
+        countLiterals(cI+1);
+        { countLiterals_monotone(cI+1); }
       }
     }
   }
@@ -683,6 +687,7 @@ trait DataStructures {
     requires oldTau[variable] == -1;
     requires newTau[variable] in [0, 1];
     requires countTrueLiterals(oldTau, clause) as int < |clause|;
+    requires countTrueLiterals(newTau, clause) as int <= |clause|;
 
     ensures countTrueLiterals(newTau, clause) == countTrueLiterals(oldTau, clause) + 1;
   {
@@ -713,13 +718,14 @@ trait DataStructures {
       k := k - 1;
     }
     assert clause[k] == trueLiteral;
-    assert countTrueLiterals(oldTau, clause[k..]) + 1
-      == countTrueLiterals(newTau, clause[k..]);
+    // assert countTrueLiterals(oldTau, clause[k..]) + 1
+    //   == countTrueLiterals(newTau, clause[k..]);
     k := k - 1;
     while (k >= 0)
       invariant -1 <= k < |clause|;
       invariant countTrueLiterals(oldTau, clause[k+1..]) + 1
         == countTrueLiterals(newTau, clause[k+1..]);
+      decreases k;
     {
       if (clause[k] != falseLiteral) {
         assert oldTau[getVariableFromLiteral(clause[k])]
@@ -728,6 +734,7 @@ trait DataStructures {
       k := k - 1;
     }
   }
+
 
   lemma setVariable_countFalseLiteralsIncreasesWithOne(
     oldTau : seq<SYInt32.t>, 
@@ -747,6 +754,7 @@ trait DataStructures {
     requires oldTau[variable] == -1;
     requires newTau[variable] in [0, 1];
     requires countFalseLiterals(oldTau, clause) as int < |clause|;
+    requires countFalseLiterals(newTau, clause) as int <= |clause|;
 
     ensures countFalseLiterals(newTau, clause) == countFalseLiterals(oldTau, clause) + 1;
   {
@@ -778,9 +786,9 @@ trait DataStructures {
       }
       k := k - 1;
     }
-    assert clause[k] == falseLiteral;
-    assert countFalseLiterals(oldTau, clause[k..]) + 1
-      == countFalseLiterals(newTau, clause[k..]);
+    // assert clause[k] == falseLiteral;
+    // assert countFalseLiterals(oldTau, clause[k..]) + 1
+    //   == countFalseLiterals(newTau, clause[k..]);
     k := k - 1;
     while (k >= 0)
       invariant -1 <= k < |clause|;
@@ -860,6 +868,8 @@ trait DataStructures {
 
     requires oldTau[variable] in [0, 1];
     requires newTau[variable] == -1;
+    requires countTrueLiterals(oldTau, clause) as int <= |clause|;
+    requires countTrueLiterals(newTau, clause) as int < |clause|;
 
     ensures countTrueLiterals(newTau, clause) 
       == countTrueLiterals(oldTau, clause) - 1;
@@ -931,6 +941,8 @@ trait DataStructures {
 
     requires oldTau[variable] in [0, 1];
     requires newTau[variable] == -1;
+    requires countFalseLiterals(oldTau, clause) as int <= |clause|;
+    requires countFalseLiterals(newTau, clause) as int < |clause|;
 
     ensures countFalseLiterals(newTau, clause)
               == countFalseLiterals(oldTau, clause) - 1;
@@ -1221,11 +1233,12 @@ trait DataStructures {
         && isSatisfied(tau')
     );
   {
-    // var tau' :| validValuesTruthAssignment(tau')
-    //     && isTauComplete(tau')
-    //     && isExtendingTau(tau, tau')
-    //     && isSatisfied(tau');
-    var tau' := getExtendedCompleteTau(tau); // [SY_Debug] Buggy!
+    var tau' :| validValuesTruthAssignment(tau')
+        && isTauComplete(tau')
+        && isExtendingTau(tau, tau')
+        && isSatisfied(tau');
+
+    // var tau' := getExtendedCompleteTau(tau); // [SY_Debug] Buggy!
 
     tau'
   }

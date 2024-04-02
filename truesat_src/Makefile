@@ -1,8 +1,8 @@
 verify:
-	dafny /timeLimit:5 /compile:0 /vcsCores:24 /errorLimit:1 /trace *.dfy solver/*.dfy
+	dafny /compile:0 /vcsCores:24 /errorLimit:1 /trace *.dfy solver/*.dfy
 
 verifysingle:
-	dafny /compile:0 /vcsCores:1 /errorLimit:1 /trace *.dfy solver/*.dfy
+	dafny /timeLimit:50 /compile:0 /vcsCores:1 /errorLimit:1 /trace *.dfy solver/*.dfy
 
 build:
 	dafny /compileTarget:cs /compileVerbose:1 /spillTargetCode:1 /compile:2 /unicodeChar:0 truesat.dfy file_input.cs
