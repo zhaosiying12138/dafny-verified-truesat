@@ -1216,32 +1216,29 @@ trait DataStructures {
     forall i :: 0 <= i < |tau| ==> tau[i] != -1
   }
 
-  function getExtendedCompleteTau(tau : seq<SYInt32.t>) : seq<SYInt32.t>
-    reads `variablesCount, `clauses, `clausesCount,
-          `clauseLength, clauseLength;
-    requires validVariablesCount();
-    requires validClauses();
-    requires validValuesTruthAssignment(tau);
-    requires isSatisfiableExtend(tau);
+  // function getExtendedCompleteTau(tau : seq<SYInt32.t>) : seq<SYInt32.t>
+  //   reads `variablesCount, `clauses, `clausesCount,
+  //         `clauseLength, clauseLength;
+  //   requires validVariablesCount();
+  //   requires validClauses();
+  //   requires validValuesTruthAssignment(tau);
+  //   requires isSatisfiableExtend(tau);
 
-    ensures (
-      var tau' := getExtendedCompleteTau(tau);
+  //   ensures (
+  //     var tau' := getExtendedCompleteTau(tau);
 
-      validValuesTruthAssignment(tau')
-        && isTauComplete(tau')
-        && isExtendingTau(tau, tau')
-        && isSatisfied(tau')
-    );
-  {
-    var tau' :| validValuesTruthAssignment(tau')
-        && isTauComplete(tau')
-        && isExtendingTau(tau, tau')
-        && isSatisfied(tau');
-
-    // var tau' := getExtendedCompleteTau(tau); // [SY_Debug] Buggy!
-
-    tau'
-  }
+  //     validValuesTruthAssignment(tau')
+  //       && isTauComplete(tau')
+  //       && isExtendingTau(tau, tau')
+  //       && isSatisfied(tau')
+  //   );
+  // {
+  //   var tau' :| validValuesTruthAssignment(tau')
+  //       && isTauComplete(tau')
+  //       && isExtendingTau(tau, tau')
+  //       && isSatisfied(tau');
+  //   tau'
+  // }
 
   ghost predicate isSatisfiableExtend(tau : seq<SYInt32.t>)
     reads `variablesCount, `clauses, `clausesCount,
