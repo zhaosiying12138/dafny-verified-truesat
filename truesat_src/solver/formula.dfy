@@ -1962,16 +1962,15 @@ class Formula extends DataStructures {
 
     ensures !isSatisfiableExtend(tau);
   {
-    // I think it is 廢話(nonsense)。 // SiYing Comment
-    // if (isSatisfiableExtend(tau)) {
-    //   ghost var tauT := getExtendedCompleteTau(tau);
+    if (isSatisfiableExtend(tau)) {
+      ghost var tauT := getExtendedCompleteTau(tau);
 
-    //   if (tauT[variable] == 0) {
-    //     assert isExtendingTau(tau[variable as int := 0], tauT);
-    //   } else if (tauT[variable] == 1) {
-    //     assert isExtendingTau(tau[variable as int := 1], tauT);
-    //   }
-    // }
+      if (tauT[variable] == 0) {
+        assert isExtendingTau(tau[variable as int := 0], tauT);
+      } else if (tauT[variable] == 1) {
+        assert isExtendingTau(tau[variable as int := 1], tauT);
+      }
+    }
   }
 
   lemma extensionSatisfiable_baseSatisfiable(
@@ -1993,8 +1992,8 @@ class Formula extends DataStructures {
     ghost var tau' := tau[variable as int := value];
     assert isSatisfiableExtend(tau');
 
-    // ghost var tau'' := getExtendedCompleteTau(tau');
-    // assert isExtendingTau(tau, tau'');
+    ghost var tau'' := getExtendedCompleteTau(tau');
+    assert isExtendingTau(tau, tau'');
   }
 }
 
