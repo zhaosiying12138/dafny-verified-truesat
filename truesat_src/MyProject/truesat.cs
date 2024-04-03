@@ -744,6 +744,7 @@ class Formula extends DataStructures {
       var clauseIndex := positivelyImpactedClauses[i];
       ghost var clause := clauses[clauseIndex];
       assert validClause(clause);
+      unsetVariable_countTrueLiteralsLessThanLength(newTau, variable, clauses[clauseIndex]);
       unsetVariable_countTrueLiteralsDecreasesWithOne(previousTau, newTau, variable, clause);
       trueLiteralsCount[clauseIndex] := trueLiteralsCount[clauseIndex] - 1;
       i := i + 1;
@@ -775,6 +776,7 @@ class Formula extends DataStructures {
         modifies falseLiteralsCount
       {
         var clauseIndex := negativelyImpactedClauses[i];
+        unsetVariable_countFalseLiteralsLessThanLength(newTau, variable, clauses[clauseIndex]);
         unsetVariable_countFalseLiteralsDecreasesWithOne(previousTau, newTau, variable, clauses[clauseIndex]);
         falseLiteralsCount[clauseIndex] := falseLiteralsCount[clauseIndex] - 1;
         i := i + 1;
@@ -1894,14 +1896,6 @@ class Formula extends DataStructures {
     ensures !isSatisfiableExtend(tau)
     decreases tau, variable
   {
-    if isSatisfiableExtend(tau) {
-      ghost var tauT := getExtendedCompleteTau(tau);
-      if tauT[variable] == 0 {
-        assert isExtendingTau(tau[variable as int := 0], tauT);
-      } else if tauT[variable] == 1 {
-        assert isExtendingTau(tau[variable as int := 1], tauT);
-      }
-    }
   }
 
   lemma /*{:_induction this}*/ extensionSatisfiable_baseSatisfiable(tau: seq<SYInt32.t>, variable: SYInt32.t, value: SYInt32.t)
@@ -1917,8 +1911,6 @@ class Formula extends DataStructures {
   {
     ghost var tau' := tau[variable as int := value];
     assert isSatisfiableExtend(tau');
-    ghost var tau'' := getExtendedCompleteTau(tau');
-    assert isExtendingTau(tau, tau'');
   }
 }
 
@@ -2637,6 +2629,7 @@ trait DataStructures {
     requires oldTau[variable] == -1
     requires newTau[variable] in [0, 1]
     requires countTrueLiterals(oldTau, clause) as int < |clause|
+    requires countTrueLiterals(newTau, clause) as int <= |clause|
     ensures countTrueLiterals(newTau, clause) == countTrueLiterals(oldTau, clause) + 1
     decreases oldTau, newTau, variable, clause
   {
@@ -2661,12 +2654,11 @@ trait DataStructures {
       k := k - 1;
     }
     assert clause[k] == trueLiteral;
-    assert countTrueLiterals(oldTau, clause[k..]) + 1 == countTrueLiterals(newTau, clause[k..]);
     k := k - 1;
     while k >= 0
       invariant -1 <= k < |clause|
       invariant countTrueLiterals(oldTau, clause[k + 1..]) + 1 == countTrueLiterals(newTau, clause[k + 1..])
-      decreases k - 0
+      decreases k
     {
       if clause[k] != falseLiteral {
         assert oldTau[getVariableFromLiteral(clause[k])] == newTau[getVariableFromLiteral(clause[k])];
@@ -2687,6 +2679,7 @@ trait DataStructures {
     requires oldTau[variable] == -1
     requires newTau[variable] in [0, 1]
     requires countFalseLiterals(oldTau, clause) as int < |clause|
+    requires countFalseLiterals(newTau, clause) as int <= |clause|
     ensures countFalseLiterals(newTau, clause) == countFalseLiterals(oldTau, clause) + 1
     decreases oldTau, newTau, variable, clause
   {
@@ -2712,8 +2705,6 @@ trait DataStructures {
       }
       k := k - 1;
     }
-    assert clause[k] == falseLiteral;
-    assert countFalseLiterals(oldTau, clause[k..]) + 1 == countFalseLiterals(newTau, clause[k..]);
     k := k - 1;
     while k >= 0
       invariant -1 <= k < |clause|
@@ -2775,6 +2766,8 @@ trait DataStructures {
     requires forall x: SYInt32.t {:trigger newTau[x]} {:trigger oldTau[x]} :: 0 <= x as int < |oldTau| && x != variable ==> oldTau[x] == newTau[x]
     requires oldTau[variable] in [0, 1]
     requires newTau[variable] == -1
+    requires countTrueLiterals(oldTau, clause) as int <= |clause|
+    requires countTrueLiterals(newTau, clause) as int < |clause|
     ensures countTrueLiterals(newTau, clause) == countTrueLiterals(oldTau, clause) - 1
     decreases oldTau, newTau, variable, clause
   {
@@ -2825,6 +2818,8 @@ trait DataStructures {
     requires forall x: SYInt32.t {:trigger newTau[x]} {:trigger oldTau[x]} :: 0 <= x as int < |oldTau| && x != variable ==> oldTau[x] == newTau[x]
     requires oldTau[variable] in [0, 1]
     requires newTau[variable] == -1
+    requires countFalseLiterals(oldTau, clause) as int <= |clause|
+    requires countFalseLiterals(newTau, clause) as int < |clause|
     ensures countFalseLiterals(newTau, clause) == countFalseLiterals(oldTau, clause) - 1
     decreases oldTau, newTau, variable, clause
   {
@@ -3027,19 +3022,6 @@ trait DataStructures {
     forall i: int {:trigger tau[i]} :: 
       0 <= i < |tau| ==>
         tau[i] != -1
-  }
-
-  function getExtendedCompleteTau(tau: seq<SYInt32.t>): seq<SYInt32.t>
-    requires validVariablesCount()
-    requires validClauses()
-    requires validValuesTruthAssignment(tau)
-    requires isSatisfiableExtend(tau)
-    reads `variablesCount, `clauses, `clausesCount, `clauseLength, clauseLength
-    ensures var tau': seq<SYInt32.t> := getExtendedCompleteTau(tau); validValuesTruthAssignment(tau') && isTauComplete(tau') && isExtendingTau(tau, tau') && isSatisfied(tau')
-    decreases {this, this, this, this, clauseLength}, tau
-  {
-    var tau': seq<SYInt32.t> := getExtendedCompleteTau(tau);
-    tau'
   }
 
   ghost predicate isSatisfiableExtend(tau: seq<SYInt32.t>)
@@ -9733,9 +9715,6 @@ namespace _module {
     public bool isTauComplete(Dafny.ISequence<int> tau) {
       return _Companion_DataStructures.isTauComplete(this, tau);
     }
-    public Dafny.ISequence<int> getExtendedCompleteTau(Dafny.ISequence<int> tau) {
-      return _Companion_DataStructures.getExtendedCompleteTau(this, tau);
-    }
     public bool isSatisfiableTruthAssignment(Dafny.ISequence<int> tau, Dafny.ISequence<int> tau_k)
     {
       return _Companion_DataStructures.isSatisfiableTruthAssignment(this, tau, tau_k);
@@ -10084,7 +10063,7 @@ namespace _module {
               }
             }
           }
-          throw new System.Exception("assign-such-that search produced no value (line 1239)");
+          throw new System.Exception("assign-such-that search produced no value (line 1241)");
         after__ASSIGN_SUCH_THAT_0: ;
           return true;
         }
@@ -10128,7 +10107,7 @@ namespace _module {
               }
             }
           }
-          throw new System.Exception("assign-such-that search produced no value (line 1285)");
+          throw new System.Exception("assign-such-that search produced no value (line 1287)");
         after__ASSIGN_SUCH_THAT_1: ;
           return false;
         }
@@ -10224,7 +10203,6 @@ namespace _module {
     bool isSatisfied(Dafny.ISequence<int> truthAssignment);
     bool isExtendingTau(Dafny.ISequence<int> tau, Dafny.ISequence<int> tau_k);
     bool isTauComplete(Dafny.ISequence<int> tau);
-    Dafny.ISequence<int> getExtendedCompleteTau(Dafny.ISequence<int> tau);
     bool isSatisfiableTruthAssignment(Dafny.ISequence<int> tau, Dafny.ISequence<int> tau_k);
     bool isUnitClause(int index);
     bool isEmptyClause(int index);
@@ -10543,10 +10521,6 @@ namespace _module {
         BigInteger _182_i = (BigInteger)_forall_var_32;
         return !(((_182_i).Sign != -1) && ((_182_i) < (new BigInteger((_181_tau).Count)))) || (((_181_tau).Select(_182_i)) != (-1));
       }))))(tau);
-    }
-    public static Dafny.ISequence<int> getExtendedCompleteTau(DataStructures _this, Dafny.ISequence<int> tau) {
-      Dafny.ISequence<int> _183_tau_k = (_this).getExtendedCompleteTau(tau);
-      return _183_tau_k;
     }
     public static bool isSatisfiableTruthAssignment(DataStructures _this, Dafny.ISequence<int> tau, Dafny.ISequence<int> tau_k)
     {
